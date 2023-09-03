@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "@ethereumjs/evm": "^2.0.0",
+    "@ethereumjs/trie": "^6.0.0",
+    "@ethereumjs/util": "^9.0.0"
+  }
+}
