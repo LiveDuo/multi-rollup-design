@@ -8,6 +8,10 @@ const evm = new EVM()
 // https://www.npmjs.com/package/@ethereumjs/evm
 ;(async () => {
 
+    console.log('---- Code ----')
+    console.log(code.join(''))
+    console.log()
+
     console.log('---- Stack ----')
     evm.events.on('step', (data) => console.log(`${data.opcode.name}\t-> ${data.stack}`))
 
