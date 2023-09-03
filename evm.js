@@ -1,6 +1,6 @@
 const { EVM } = require('@ethereumjs/evm')
 
-const OP_CODES = {STOP: '00', ADD: '01', PUSH1: '60'}
+const OP_CODES = {STOP: '00', ADD: '01', PUSH1: '60', CALLDATALOAD: '35'}
 const code = [OP_CODES.PUSH1, '03', OP_CODES.PUSH1, '05', OP_CODES.ADD, OP_CODES.STOP]
 
 const evm = new EVM()
@@ -15,7 +15,7 @@ const evm = new EVM()
     console.log('---- Stack ----')
     evm.events.on('step', (data) => console.log(`${data.opcode.name}\t-> ${data.stack}`))
 
-    const result = await evm.runCode({ code: Buffer.from(code.join(''), 'hex') })
+    const result = await evm.runCode({ data: [7], code: Buffer.from(code.join(''), 'hex') })
     console.log()
     console.log('---- Result ----')
     console.log('storageRoot:', Buffer.from(result.runState.contract.storageRoot).toString('hex'))
