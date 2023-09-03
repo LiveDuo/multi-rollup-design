@@ -23,6 +23,7 @@ const evm = new EVM()
     console.log('executionGasUsed', result.executionGasUsed)
     console.log('stack', result.runState.stack._store[0])
     console.log('returnValue', result.returnValue)
+    console.log()
 
     // console.log(Object.keys(result))
 
