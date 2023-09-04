@@ -17,7 +17,6 @@ const processTransaction = async (tx) => {
     if (tx.type === 'hub') {
         if (tx.action === 'create_contract') {
 
-            
             // update rollup
             const rollupId = 0 // TODO
             executionLayer['rollups'][rollupId] = { vm: new VM() }
