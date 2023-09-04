@@ -1,7 +1,6 @@
 const { VM } = require('@ethereumjs/vm')
 const { Wallet } = require('@ethereumjs/wallet')
 const { TransactionFactory } = require('@ethereumjs/tx')
-const { Address } = require('@ethereumjs/util')
 
 const OP_CODES = {PUSH1: '60', SSTORE: '55'}
 const code = [OP_CODES.PUSH1, '02', OP_CODES.PUSH1, '03', OP_CODES.SSTORE]
@@ -10,7 +9,6 @@ const vm = new VM()
 
 // prepare sender
 const senderWallet = Wallet.generate()
-const senderAddress = Address.fromPrivateKey(senderWallet.getPrivateKey())
 
 // https://github.com/ethereumjs/ethereumjs-monorepo/blob/master/packages/util/test/account.spec.ts#L500
 ;(async () => {
@@ -29,8 +27,7 @@ const senderAddress = Address.fromPrivateKey(senderWallet.getPrivateKey())
   console.log('tx2 error:', result2.execResult?.exceptionError)
 
   // dump storage
-  console.log('senderAddress dumpStorage:', await vm.stateManager.dumpStorage(senderAddress))
   console.log('createdAddress:', result.createdAddress.toString())
-  console.log('createdAddress dumpStorage:', await vm.stateManager.dumpStorage(result.createdAddress))
+  console.log('dumpStorage:', await vm.stateManager.dumpStorage(result.createdAddress))
 
 })()
