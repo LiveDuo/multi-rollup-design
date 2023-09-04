@@ -4,8 +4,6 @@ const { VM } = require('@ethereumjs/vm')
 const { Wallet } = require('@ethereumjs/wallet')
 const { TransactionFactory } = require('@ethereumjs/tx')
 
-const submitTransaction = async (tx) => { daLayer.push(tx); const result = await processTransaction(tx); return result }
-
 const daLayer = []
 const executionLayer = { rollups: {}, hub: { contracts: {}, sequencers: {} } }
 
@@ -52,6 +50,8 @@ const processTransaction = async (tx) => {
         }
     }
 }
+
+const submitTransaction = async (tx) => { daLayer.push(tx); const result = await processTransaction(tx); return result }
 
 ;(async () => {
     const result = await submitTransaction({type: 'hub', action: 'create_contract', data: '0x' + code.join('')})
