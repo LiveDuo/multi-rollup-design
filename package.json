@@ -6,6 +6,7 @@
     "@ethereumjs/tx": "^5.0.0",
     "@ethereumjs/util": "^9.0.0",
     "@ethereumjs/vm": "^7.0.0",
-    "@ethereumjs/wallet": "^2.0.0"
+    "@ethereumjs/wallet": "^2.0.0",
+    "solc": "^0.8.21"
   }
 }
