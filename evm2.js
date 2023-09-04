@@ -3,6 +3,9 @@ const { Wallet } = require('@ethereumjs/wallet')
 const { TransactionFactory } = require('@ethereumjs/tx')
 const { Account, Address } = require('@ethereumjs/util')
 
+const OP_CODES = {STOP: '00', ADD: '01', PUSH1: '60', SSTORE: '55'}
+const code = [OP_CODES.PUSH1, '02', OP_CODES.PUSH1, '03', OP_CODES.SSTORE]
+
 const vm = new VM()
 
 // prepare sender
@@ -18,7 +21,7 @@ const senderAddress = Address.fromPrivateKey(senderWallet.getPrivateKey())
   
   // run tx
   const txOptions = { gasPrice: '0x10', gasLimit: '0x20000' }
-  const unsignedTx = TransactionFactory.fromTxData({ ...txOptions, data: '0x6002600355', })
+  const unsignedTx = TransactionFactory.fromTxData({ ...txOptions, data: '0x' + code.join(''), })
   const tx = unsignedTx.sign(senderWallet.getPrivateKey())
   const result = await vm.runTx({ tx })
   console.log('tx error:', result.execResult?.exceptionError)
