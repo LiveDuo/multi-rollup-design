@@ -34,7 +34,7 @@ const processTransaction = async (tx) => {
             // debug
             console.log('tx error:', result.execResult?.exceptionError)
 
-            return result.createdAddress
+            return result
 
         }
     } else if (tx.type === 'rollup') {
@@ -52,15 +52,14 @@ const processTransaction = async (tx) => {
             const storage = { ...executionLayer.rollups[rollupId], storage: { [contractAddress]: contractStorage }}
             executionLayer.rollups[rollupId] = storage
 
-            // debug
-            console.log('tx error:', result.execResult?.exceptionError)
+            return result
         }
     }
 }
 
 ;(async () => {
-    const address = await submitTransaction({type: 'hub', action: 'create_contract', data: '0x' + code.join('')})
-    await submitTransaction({type: 'rollup', typeParams: [0], action: 'call_contract', actionParams: [address], data: '01'})
+    const result = await submitTransaction({type: 'hub', action: 'create_contract', data: '0x' + code.join('')})
+    await submitTransaction({type: 'rollup', typeParams: [0], action: 'call_contract', actionParams: [result.createdAddress], data: ''})
     console.log(util.inspect(executionLayer, {depth: null}))
 
 })()
