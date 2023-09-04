@@ -1,7 +1,7 @@
 const { EVM } = require('@ethereumjs/evm')
 const { Account, Address } = require('@ethereumjs/util')
 
-const OP_CODES = {STOP: '00', ADD: '01', PUSH1: '60', SSTORE: '55'}
+const OP_CODES = {PUSH1: '60', SSTORE: '55'}
 const code = [OP_CODES.PUSH1, '02', OP_CODES.PUSH1, '03', OP_CODES.SSTORE]
 
 const evm = new EVM()
