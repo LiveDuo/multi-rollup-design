@@ -9,12 +9,6 @@ const vm = new VM()
 const senderWallet = Wallet.generate()
 const senderAddress = Address.fromPrivateKey(senderWallet.getPrivateKey())
 
-// prepare tx
-const txOptions = { gasPrice: '0x10', gasLimit: '0x20000' }
-const bytecode = '0x60'
-const unsignedTx = TransactionFactory.fromTxData({ ...txOptions, data: bytecode, })
-const tx = unsignedTx.sign(senderWallet.getPrivateKey())
-
 // https://github.com/ethereumjs/ethereumjs-monorepo/blob/master/packages/util/test/account.spec.ts#L500
 ;(async () => {
 
@@ -23,10 +17,18 @@ const tx = unsignedTx.sign(senderWallet.getPrivateKey())
   await vm.stateManager.putAccount(senderAddress, Account.fromAccountData({ ...account, balance: 1000n ** 18n }))
   
   // run tx
+  const txOptions = { gasPrice: '0x10', gasLimit: '0x20000' }
+  const unsignedTx = TransactionFactory.fromTxData({ ...txOptions, data: '0x6002600355', })
+  const tx = unsignedTx.sign(senderWallet.getPrivateKey())
   const result = await vm.runTx({ tx })
-  console.log('totalGasSpent:', result.totalGasSpent)
-  console.log('error:', result.execResult?.exceptionError)
+  console.log('tx error:', result.execResult?.exceptionError)
   
+  // run tx2
+  const unsignedTx2 = TransactionFactory.fromTxData({ ...txOptions, to: result.createdAddress, nonce: 1 })
+  const tx2 = unsignedTx2.sign(senderWallet.getPrivateKey())
+  const result2 = await vm.runTx({ tx: tx2 })
+  console.log('tx2 error:', result2.execResult?.exceptionError)
+
   // dump storage
   console.log('senderAddress dumpStorage:', await vm.stateManager.dumpStorage(senderAddress))
   console.log('createdAddress:', result.createdAddress.toString())
