@@ -1,7 +1,8 @@
 const { VM } = require('@ethereumjs/vm')
 const { Wallet } = require('@ethereumjs/wallet')
 const { TransactionFactory } = require('@ethereumjs/tx')
-const { Account, Address } = require('@ethereumjs/util')
+const { Account, Address, bytesToHex, generateAddress2, toBytes } = require('@ethereumjs/util')
+const { keccak256 } = require('ethereum-cryptography/keccak')
 
 const vm = new VM()
 
@@ -15,6 +16,7 @@ const bytecode = '0x606060405260405161023e38038061023e83398101604052805101805161
 const unsignedTx = TransactionFactory.fromTxData({ ...txOptions, to: Wallet.generate().getAddressString(), data: bytecode, })
 const tx = unsignedTx.sign(senderWallet.getPrivateKey())
 
+// https://github.com/ethereumjs/ethereumjs-monorepo/blob/master/packages/util/test/account.spec.ts#L500
 ;(async () => {
 
   // assign sender
@@ -24,5 +26,12 @@ const tx = unsignedTx.sign(senderWallet.getPrivateKey())
   // run tx
   const result = await vm.runTx({ tx })
   console.log('totalGasSpent:', result.totalGasSpent)
+  
+  // dump storage
+  const salt = toBytes('0x0000000000000000000000000000000000000000000000000000000000000000')
+  const contractBuffer = generateAddress2(senderAddress.toBytes(), salt, keccak256(Buffer.from(bytecode.substring(2), 'hex')))
+  const contractAddress = bytesToHex(contractBuffer)
+  
+  console.log('dumpStorage:', await vm.stateManager.dumpStorage(Address.fromString(contractAddress)))
 
 })()
