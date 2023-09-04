@@ -17,10 +17,12 @@ const processTransaction = async (tx) => {
     if (tx.type === 'hub') {
         if (tx.action === 'create_contract') {
 
-            // update rollup
+            // get rollup
             const rollupId = 0 // TODO
-            executionLayer['rollups'][rollupId] = { vm: new VM() }
-            const rollup = executionLayer['rollups'][rollupId]
+            const rollup = { vm: new VM() }
+            
+            // update rollup
+            executionLayer['rollups'][rollupId] = rollup
 
             // deploy contract
             const unsignedTx = TransactionFactory.fromTxData({ ...txOptions, data: tx.data, })
@@ -28,7 +30,7 @@ const processTransaction = async (tx) => {
             const result = await rollup.vm.runTx({ tx: signedTx, skipBalance: true })
 
             // update hub
-            executionLayer['hub'].contracts[result.createdAddress] = { rollupId, code: tx.data }
+            executionLayer['hub'].contracts[result.createdAddress] = { rollupId } // code: tx.data
 
             return result
 
@@ -38,7 +40,7 @@ const processTransaction = async (tx) => {
             
             // get rollup
             const rollupId = tx.typeParams[0]
-            const rollup = executionLayer.rollups[rollupId]
+            const rollup = executionLayer['rollups'][rollupId]
 
             // call contract
             const contractAddress = tx.actionParams[0]
@@ -49,7 +51,7 @@ const processTransaction = async (tx) => {
             // update rollup
             const contractStorage = await rollup.vm.stateManager.dumpStorage(contractAddress)
             const storage = { ...rollup, storage: { [contractAddress]: contractStorage }}
-            executionLayer.rollups[rollupId] = storage
+            executionLayer['rollups'][rollupId] = storage
 
             return result
         }
@@ -66,7 +68,7 @@ const submitTransaction = async (tx) => { daLayer.push(tx); const result = await
     await submitTransaction({type: 'rollup', typeParams: [0], action: 'call_contract', actionParams: [result.createdAddress], data: ''})
 
     // debug
-    const executionLayerP = {...executionLayer, rollups: Object.entries(executionLayer.rollups).map(([k, v]) => ({[k]: {storage: v.storage}})) }
+    const executionLayerP = {...executionLayer, rollups: Object.entries(executionLayer.rollups).reduce((p, [k, v]) => { p[k] = {storage: v.storage}; return p }, {}) }
     console.log(util.inspect(executionLayerP, {depth: null}))
 
 })()
