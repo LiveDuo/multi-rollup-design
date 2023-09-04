@@ -22,17 +22,16 @@ const vm = new VM()
 const processTransaction = async (tx) => {
     if (tx.type === 'hub') {
         if (tx.action === 'create_contract') {
-            const rollupId = 0 // TODO
-            const contractId = hash(tx.data)
-            executionLayer['hub'].contracts[contractId] = { rollupId, code: tx.data }
 
             // deploy contract
             const unsignedTx = TransactionFactory.fromTxData({ ...txOptions, data: tx.data, })
             const signedTx = unsignedTx.sign(senderWallet.getPrivateKey())
             const result = await vm.runTx({ tx: signedTx, skipBalance: true })
 
-            // debug
-            console.log('tx error:', result.execResult?.exceptionError)
+            // update hub
+            const rollupId = 0 // TODO
+            const contractId = hash(tx.data)
+            executionLayer['hub'].contracts[contractId] = { rollupId, code: tx.data }
 
             return result
 
@@ -46,7 +45,7 @@ const processTransaction = async (tx) => {
             const tx2 = unsignedTx2.sign(senderWallet.getPrivateKey())
             const result = await vm.runTx({ tx: tx2, skipBalance: true })
 
-            // update storage
+            // update rollup
             const rollupId = tx.typeParams[0]
             const contractStorage = await vm.stateManager.dumpStorage(contractAddress)
             const storage = { ...executionLayer.rollups[rollupId], storage: { [contractAddress]: contractStorage }}
