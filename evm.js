@@ -1,7 +1,8 @@
 const { EVM } = require('@ethereumjs/evm')
+const { Account, Address } = require('@ethereumjs/util')
 
-const OP_CODES = {STOP: '00', ADD: '01', PUSH1: '60', CALLDATALOAD: '35'}
-const code = [OP_CODES.PUSH1, '12', OP_CODES.CALLDATALOAD, OP_CODES.PUSH1, '03', OP_CODES.PUSH1, '05', OP_CODES.ADD, OP_CODES.STOP]
+const OP_CODES = {STOP: '00', ADD: '01', PUSH1: '60', SSTORE: '55'}
+const code = [OP_CODES.PUSH1, '02', OP_CODES.PUSH1, '03', OP_CODES.SSTORE]
 
 const evm = new EVM()
 
@@ -15,17 +16,18 @@ const evm = new EVM()
     console.log('---- Stack ----')
     evm.events.on('step', (data) => console.log(`${data.opcode.name}\t-> ${data.stack}`))
 
-    const result = await evm.runCode({ data: [7, 2], code: Buffer.from(code.join(''), 'hex') })
+    await evm.stateManager.putAccount(Address.zero(), Account.fromAccountData({}))
+    const result = await evm.runCode({ code: Buffer.from(code.join(''), 'hex') })
     console.log()
     console.log('---- Result ----')
-    console.log('storageRoot:', Buffer.from(result.runState.contract.storageRoot).toString('hex'))
-    console.log('codeHash', Buffer.from(result.runState.contract.codeHash).toString('hex'))
+    console.log('dumpStorage:', await evm.stateManager.dumpStorage(Address.zero()))
     console.log('executionGasUsed', result.executionGasUsed)
-    console.log('stack', result.runState.stack._store[0])
-    console.log('returnValue', result.returnValue)
     console.log()
 
-    // console.log(Object.keys(result))
+    // console.log('storageRoot:', Buffer.from(result.runState.contract.storageRoot).toString('hex'))
+    // console.log('codeHash', Buffer.from(result.runState.contract.codeHash).toString('hex'))
+    // console.log('returnValue', result.returnValue)
+    // console.log('storageRoot:', await evm.stateManager.getStateRoot().then(t => Buffer.from(t).toString('hex')))
 
 })()
 
