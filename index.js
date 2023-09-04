@@ -1,11 +1,9 @@
 const util = require('util')
-const crypto = require('crypto')
 
 const { VM } = require('@ethereumjs/vm')
 const { Wallet } = require('@ethereumjs/wallet')
 const { TransactionFactory } = require('@ethereumjs/tx')
 
-const hash = (d) => crypto.createHash('md5').update(d).digest('hex')
 const submitTransaction = async (tx) => { daLayer.push(tx); const result = await processTransaction(tx); return result }
 
 const daLayer = []
@@ -30,8 +28,7 @@ const processTransaction = async (tx) => {
 
             // update hub
             const rollupId = 0 // TODO
-            const contractId = hash(tx.data)
-            executionLayer['hub'].contracts[contractId] = { rollupId, code: tx.data }
+            executionLayer['hub'].contracts[result.createdAddress] = { rollupId, code: tx.data }
 
             return result
 
