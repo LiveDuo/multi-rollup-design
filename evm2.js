@@ -1,5 +1,5 @@
 const { VM } = require('@ethereumjs/vm')
-const {Wallet} = require('@ethereumjs/wallet')
+const { Wallet } = require('@ethereumjs/wallet')
 const { TransactionFactory } = require('@ethereumjs/tx')
 const { Account, Address } = require('@ethereumjs/util')
 
