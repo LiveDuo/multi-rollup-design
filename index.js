@@ -4,14 +4,16 @@ const { VM } = require('@ethereumjs/vm')
 const { Wallet } = require('@ethereumjs/wallet')
 const { TransactionFactory } = require('@ethereumjs/tx')
 
+// constants
+const GAS_PRICE = '0x10', GAS_LIMIT = '0x20000'
+const OP_CODES = { PUSH1: '60', SSTORE: '55' }
+
+// state
 const daLayer = []
 const executionLayer = { rollups: {}, hub: { contracts: {}, sequencers: {} } }
 
+// signer
 const senderWallet = Wallet.generate()
-const txOptions = { gasPrice: '0x10', gasLimit: '0x20000' }
-
-const OP_CODES = {PUSH1: '60', SSTORE: '55'}
-const code = [OP_CODES.PUSH1, '02', OP_CODES.PUSH1, '03', OP_CODES.SSTORE]
 
 const processTransaction = async (tx) => {
     if (tx.type === 'hub') {
@@ -25,7 +27,7 @@ const processTransaction = async (tx) => {
             executionLayer['rollups'][rollupId] = rollup
 
             // deploy contract
-            const unsignedTx = TransactionFactory.fromTxData({ ...txOptions, data: tx.data, })
+            const unsignedTx = TransactionFactory.fromTxData({ gasPrice: GAS_PRICE, gasLimit: GAS_LIMIT, data: tx.data })
             const signedTx = unsignedTx.sign(senderWallet.getPrivateKey())
             const result = await rollup.vm.runTx({ tx: signedTx, skipBalance: true })
 
@@ -44,7 +46,7 @@ const processTransaction = async (tx) => {
 
             // call contract
             const contractAddress = tx.actionParams[0]
-            const unsignedTx2 = TransactionFactory.fromTxData({ ...txOptions, to: contractAddress, nonce: 1 })
+            const unsignedTx2 = TransactionFactory.fromTxData({ gasPrice: GAS_PRICE, gasLimit: GAS_LIMIT, to: contractAddress, nonce: 1 })
             const tx2 = unsignedTx2.sign(senderWallet.getPrivateKey())
             const result = await rollup.vm.runTx({ tx: tx2, skipBalance: true })
 
@@ -62,6 +64,7 @@ const submitTransaction = async (tx) => { daLayer.push(tx); const result = await
 
 ;(async () => {
     // create contract
+    const code = [OP_CODES.PUSH1, '02', OP_CODES.PUSH1, '03', OP_CODES.SSTORE]
     const result = await submitTransaction({type: 'hub', action: 'create_contract', data: '0x' + code.join('')})
 
     // call contract
