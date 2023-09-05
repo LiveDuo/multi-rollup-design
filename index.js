@@ -20,7 +20,7 @@ const processTransaction = async (tx) => {
         if (tx.action === 'create_contract') {
 
             // get rollup
-            const rollupId = 0 // TODO
+            const rollupId = Object.keys(executionLayer.rollups).length // assign to last rollup
             const rollup = { vm: new VM() }
             
             // update rollup
