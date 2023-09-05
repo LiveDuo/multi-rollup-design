@@ -62,6 +62,8 @@ const processTransaction = async (tx) => {
 
 const submitTransaction = async (tx) => { daLayer.push(tx); const result = await processTransaction(tx); return result }
 
+const cleanupRollups = (rollups) => Object.entries(rollups).reduce((p, [k, v]) => { p[k] = {storage: v.storage}; return p }, {})
+
 ;(async () => {
     // create contract
     const code = [OP_CODES.PUSH1, '02', OP_CODES.PUSH1, '03', OP_CODES.SSTORE]
@@ -71,8 +73,8 @@ const submitTransaction = async (tx) => { daLayer.push(tx); const result = await
     await submitTransaction({type: 'rollup', typeParams: [0], action: 'call_contract', actionParams: [result.createdAddress], data: ''})
 
     // debug
-    const executionLayerP = {...executionLayer, rollups: Object.entries(executionLayer.rollups).reduce((p, [k, v]) => { p[k] = {storage: v.storage}; return p }, {}) }
-    console.log(util.inspect(executionLayerP, {depth: null}))
+    console.log('hub', util.inspect(executionLayer.hub, {depth: null}))
+    console.log('rollups', util.inspect(cleanupRollups(executionLayer.rollups), {depth: null}))
 
 })()
 
