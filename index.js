@@ -46,7 +46,7 @@ const processTransaction = async (tx) => {
 
 			// call contract
 			const contractAddress = tx.actionParams[0]
-			const unsignedTx2 = TransactionFactory.fromTxData({ gasPrice: GAS_PRICE, gasLimit: GAS_LIMIT, to: contractAddress, nonce: 1 })
+			const unsignedTx2 = TransactionFactory.fromTxData({ gasPrice: GAS_PRICE, gasLimit: GAS_LIMIT, to: contractAddress, nonce: tx.nonce })
 			const tx2 = unsignedTx2.sign(senderWallet.getPrivateKey())
 			const result = await rollup.vm.runTx({ tx: tx2, skipBalance: true })
 
@@ -70,7 +70,8 @@ const cleanupRollups = (rollups) => Object.entries(rollups).reduce((p, [k, v]) =
 	const result = await submitTransaction({ type: 'hub', action: 'create_contract', data: '0x' + code.join('') })
 
 	// call contract
-	await submitTransaction({ type: 'rollup', typeParams: [0], action: 'call_contract', actionParams: [result.createdAddress], data: '' })
+	await submitTransaction({ type: 'rollup', typeParams: [0], action: 'call_contract', actionParams: [result.createdAddress], data: '', nonce: 1 })
+	await submitTransaction({ type: 'rollup', typeParams: [0], action: 'call_contract', actionParams: [result.createdAddress], data: '', nonce: 2 })
 
 	// debug
 	console.log('hub', util.inspect(executionLayer.hub, { depth: null }))
