@@ -68,10 +68,13 @@ const cleanupRollups = (rollups) => Object.entries(rollups).reduce((p, [k, v]) =
 	// create contract
 	const code = [OP_CODES.PUSH1, '02', OP_CODES.PUSH1, '03', OP_CODES.SSTORE]
 	const result = await submitTransaction({ type: 'hub', action: 'create_contract', data: '0x' + code.join('') })
+	const code2 = [OP_CODES.PUSH1, '04', OP_CODES.PUSH1, '05', OP_CODES.SSTORE]
+	const result2 = await submitTransaction({ type: 'hub', action: 'create_contract', data: '0x' + code2.join('') })
 
 	// call contract
 	await submitTransaction({ type: 'rollup', typeParams: [0], action: 'call_contract', actionParams: [result.createdAddress], data: '', nonce: 1 })
 	await submitTransaction({ type: 'rollup', typeParams: [0], action: 'call_contract', actionParams: [result.createdAddress], data: '', nonce: 2 })
+	await submitTransaction({ type: 'rollup', typeParams: [1], action: 'call_contract', actionParams: [result2.createdAddress], data: '', nonce: 1 })
 
 	// debug
 	console.log('hub', util.inspect(executionLayer.hub, { depth: null }))
