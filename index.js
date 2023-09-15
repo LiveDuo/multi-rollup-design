@@ -16,65 +16,65 @@ const executionLayer = { rollups: {}, hub: { contracts: {}, sequencers: {} } }
 const senderWallet = Wallet.generate()
 
 const processTransaction = async (tx) => {
-    if (tx.type === 'hub') {
-        if (tx.action === 'create_contract') {
+	if (tx.type === 'hub') {
+		if (tx.action === 'create_contract') {
 
-            // get rollup
-            const rollupId = Object.keys(executionLayer.rollups).length // assign to last rollup
-            const rollup = { vm: new VM() }
-            
-            // update rollup
-            executionLayer['rollups'][rollupId] = rollup
+			// get rollup
+			const rollupId = Object.keys(executionLayer.rollups).length // assign to last rollup
+			const rollup = { vm: new VM() }
 
-            // deploy contract
-            const unsignedTx = TransactionFactory.fromTxData({ gasPrice: GAS_PRICE, gasLimit: GAS_LIMIT, data: tx.data })
-            const signedTx = unsignedTx.sign(senderWallet.getPrivateKey())
-            const result = await rollup.vm.runTx({ tx: signedTx, skipBalance: true })
+			// update rollup
+			executionLayer['rollups'][rollupId] = rollup
 
-            // update hub
-            executionLayer['hub'].contracts[result.createdAddress] = { rollupId } // code: tx.data
+			// deploy contract
+			const unsignedTx = TransactionFactory.fromTxData({ gasPrice: GAS_PRICE, gasLimit: GAS_LIMIT, data: tx.data })
+			const signedTx = unsignedTx.sign(senderWallet.getPrivateKey())
+			const result = await rollup.vm.runTx({ tx: signedTx, skipBalance: true })
 
-            return result
+			// update hub
+			executionLayer['hub'].contracts[result.createdAddress] = { rollupId } // code: tx.data
 
-        }
-    } else if (tx.type === 'rollup') {
-        if (tx.action === 'call_contract') {
-            
-            // get rollup
-            const rollupId = tx.typeParams[0]
-            const rollup = executionLayer['rollups'][rollupId]
+			return result
 
-            // call contract
-            const contractAddress = tx.actionParams[0]
-            const unsignedTx2 = TransactionFactory.fromTxData({ gasPrice: GAS_PRICE, gasLimit: GAS_LIMIT, to: contractAddress, nonce: 1 })
-            const tx2 = unsignedTx2.sign(senderWallet.getPrivateKey())
-            const result = await rollup.vm.runTx({ tx: tx2, skipBalance: true })
+		}
+	} else if (tx.type === 'rollup') {
+		if (tx.action === 'call_contract') {
 
-            // update rollup
-            const contractStorage = await rollup.vm.stateManager.dumpStorage(contractAddress)
-            const storage = { ...rollup, storage: { [contractAddress]: contractStorage }}
-            executionLayer['rollups'][rollupId] = storage
+			// get rollup
+			const rollupId = tx.typeParams[0]
+			const rollup = executionLayer['rollups'][rollupId]
 
-            return result
-        }
-    }
+			// call contract
+			const contractAddress = tx.actionParams[0]
+			const unsignedTx2 = TransactionFactory.fromTxData({ gasPrice: GAS_PRICE, gasLimit: GAS_LIMIT, to: contractAddress, nonce: 1 })
+			const tx2 = unsignedTx2.sign(senderWallet.getPrivateKey())
+			const result = await rollup.vm.runTx({ tx: tx2, skipBalance: true })
+
+			// update rollup
+			const contractStorage = await rollup.vm.stateManager.dumpStorage(contractAddress)
+			const storage = { ...rollup, storage: { [contractAddress]: contractStorage } }
+			executionLayer['rollups'][rollupId] = storage
+
+			return result
+		}
+	}
 }
 
 const submitTransaction = async (tx) => { daLayer.push(tx); const result = await processTransaction(tx); return result }
 
-const cleanupRollups = (rollups) => Object.entries(rollups).reduce((p, [k, v]) => { p[k] = {storage: v.storage}; return p }, {})
+const cleanupRollups = (rollups) => Object.entries(rollups).reduce((p, [k, v]) => { p[k] = { storage: v.storage }; return p }, {})
 
-;(async () => {
-    // create contract
-    const code = [OP_CODES.PUSH1, '02', OP_CODES.PUSH1, '03', OP_CODES.SSTORE]
-    const result = await submitTransaction({type: 'hub', action: 'create_contract', data: '0x' + code.join('')})
+; (async () => {
+	// create contract
+	const code = [OP_CODES.PUSH1, '02', OP_CODES.PUSH1, '03', OP_CODES.SSTORE]
+	const result = await submitTransaction({ type: 'hub', action: 'create_contract', data: '0x' + code.join('') })
 
-    // call contract
-    await submitTransaction({type: 'rollup', typeParams: [0], action: 'call_contract', actionParams: [result.createdAddress], data: ''})
+	// call contract
+	await submitTransaction({ type: 'rollup', typeParams: [0], action: 'call_contract', actionParams: [result.createdAddress], data: '' })
 
-    // debug
-    console.log('hub', util.inspect(executionLayer.hub, {depth: null}))
-    console.log('rollups', util.inspect(cleanupRollups(executionLayer.rollups), {depth: null}))
+	// debug
+	console.log('hub', util.inspect(executionLayer.hub, { depth: null }))
+	console.log('rollups', util.inspect(cleanupRollups(executionLayer.rollups), { depth: null }))
 
 })()
 
