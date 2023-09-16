@@ -89,8 +89,6 @@ const processTransaction = async (tx) => {
 
 const submitTransaction = async (tx) => { daLayer.push(tx); const result = await processTransaction(tx); return result }
 
-// const cleanupRollups = (rollups) => Object.entries(rollups).reduce((p, [k, v]) => { p[k] = { storage: v.storage }; return p }, {})
-
 const runMultipleTxs = async (vm, count) => {
 	for(let i = 0; i < count; i++){
 		const unsignedTx = TransactionFactory.fromTxData({ gasPrice: GAS_PRICE, gasLimit: GAS_LIMIT, data: '', nonce: i })
@@ -117,8 +115,7 @@ const runMultipleTxs = async (vm, count) => {
 	// debug
 	for ([address, data] of Object.entries(executionLayer.hub.contracts)) {
 		const storage = await executionLayer.rollups[data.rollupId].vm.stateManager.dumpStorage(Address.fromString(address))
-		console.log('Address', address, '-', 'Rollup Id', data.rollupId)
-		console.log(storage)
+		console.log('Address', address, '-', 'Rollup Id', data.rollupId, '\n', storage)
 	}
 
 })()
