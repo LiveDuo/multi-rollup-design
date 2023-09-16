@@ -1,7 +1,7 @@
 const { VM } = require('@ethereumjs/vm')
 const { Wallet } = require('@ethereumjs/wallet')
 const { TransactionFactory } = require('@ethereumjs/tx')
-const { Address } = require('@ethereumjs/util')
+const { Address, Account } = require('@ethereumjs/util')
 
 // constants
 const GAS_PRICE = '0x10', GAS_LIMIT = '0x20000'
@@ -39,8 +39,6 @@ const processTransaction = async (tx) => {
 
 		} else if (tx.action === 'reassign_contract') {
 			
-			return
-
 			const [createdAddress, rollupId] = tx.data
 			const rollupIdFrom = executionLayer['hub'].contracts[createdAddress].rollupId
 			const rollupTo = executionLayer['rollups'][rollupId]
@@ -50,7 +48,7 @@ const processTransaction = async (tx) => {
 			executionLayer['hub'].contracts[createdAddress] = { rollupId }
 
 			// assign contract account to new rollup
-			const account = await rollupFrom.vm.stateManager.getAccount(createdAddress)
+			const account = await rollupFrom.vm.stateManager.getAccount(createdAddress).then((a) => new Account(BigInt(a.nonce), BigInt(a.balance)))
 			await rollupTo.vm.stateManager.putAccount(createdAddress, account)
 
 			// assign contract code to new rollup
