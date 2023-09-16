@@ -28,7 +28,7 @@ const processTransaction = async (tx) => {
 
 			// deploy contract
 			const nonceCount = ~~(Math.random() * (20 - 10 + 1)) + 10
-			await simulateTxs(rollup.vm, nonceCount) // hack to increase nonce and get different contract addresses
+			await runMultipleTxs(rollup.vm, nonceCount) // hack to increase nonce and get different contract addresses
 			const unsignedTx2 = TransactionFactory.fromTxData({ gasPrice: GAS_PRICE, gasLimit: GAS_LIMIT, data: tx.data, nonce: nonceCount })
 			const signedTx2 = unsignedTx2.sign(senderWallet.getPrivateKey())
 			const result = await rollup.vm.runTx({ tx: signedTx2, skipBalance: true })
@@ -38,6 +38,8 @@ const processTransaction = async (tx) => {
 
 			return result
 
+		} else if (tx.action === 'reassign_contract') {
+			console.log('TODO reassign')
 		}
 	} else if (tx.type === 'rollup') {
 		if (tx.action === 'call_contract') {
@@ -66,7 +68,7 @@ const submitTransaction = async (tx) => { daLayer.push(tx); const result = await
 
 const cleanupRollups = (rollups) => Object.entries(rollups).reduce((p, [k, v]) => { p[k] = { storage: v.storage }; return p }, {})
 
-const simulateTxs = async (vm, count) => {
+const runMultipleTxs = async (vm, count) => {
 	for(let i = 0; i < count; i++){
 		const unsignedTx = TransactionFactory.fromTxData({ gasPrice: GAS_PRICE, gasLimit: GAS_LIMIT, data: '', nonce: i })
 		const signedTx = unsignedTx.sign(senderWallet.getPrivateKey())
@@ -85,6 +87,9 @@ const simulateTxs = async (vm, count) => {
 	await submitTransaction({ type: 'rollup', typeParams: [0], action: 'call_contract', actionParams: [result.createdAddress], data: '' })
 	await submitTransaction({ type: 'rollup', typeParams: [0], action: 'call_contract', actionParams: [result.createdAddress], data: '' })
 	await submitTransaction({ type: 'rollup', typeParams: [1], action: 'call_contract', actionParams: [result2.createdAddress], data: '' })
+
+	// reassign contract
+	await submitTransaction({ type: 'hub', action: 'reassign_contract', data: result2.createdAddress })
 
 	// debug
 	console.log('hub', util.inspect(executionLayer.hub, { depth: null }))
