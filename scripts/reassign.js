@@ -10,6 +10,7 @@ const OP_CODES = { PUSH1: '60', SSTORE: '55' }
 const senderWallet = Wallet.generate()
 const senderWallet2 = Wallet.generate()
 
+// vms
 const vm1 = new VM()
 const vm2 = new VM()
 
