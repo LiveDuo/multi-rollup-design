@@ -42,13 +42,17 @@ const processTransaction = async (tx) => {
 			
 			// update rollup hub
 			const [createdAddress, rollupId] = tx.data
-			const rollupIdPrevious = executionLayer['hub'].contracts[createdAddress].rollupId
+			const rollupIdFrom = executionLayer['hub'].contracts[createdAddress].rollupId
 			executionLayer['hub'].contracts[createdAddress] = { rollupId }
 
-			// update rollups
+			// remove state from rollup
+			const rollupFrom = executionLayer['rollups'][rollupIdFrom]
+			await rollupFrom.vm.stateManager.clearContractStorage(createdAddress)
+			
+			// assign state to new rollup
 			console.log('TODO')
 			console.log('assign contract', createdAddress.toString(), 'storage to rollup', rollupId)
-			console.log('remove contract', createdAddress.toString(), 'storage from rollup', rollupIdPrevious)
+			
 		}
 	} else if (tx.type === 'rollup') {
 		if (tx.action === 'call_contract') {
