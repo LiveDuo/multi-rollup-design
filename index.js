@@ -39,11 +39,16 @@ const processTransaction = async (tx) => {
 			return result
 
 		} else if (tx.action === 'reassign_contract') {
+			
+			// update rollup hub
 			const [createdAddress, rollupId] = tx.data
-			console.log('TODO reassign', createdAddress.toString(), 'to', rollupId)
-			// remove contract from rollup 0
-			// assign contract to rollup 1
-			// update rollup id in rollup hub
+			const rollupIdPrevious = executionLayer['hub'].contracts[createdAddress].rollupId
+			executionLayer['hub'].contracts[createdAddress] = { rollupId }
+
+			// update rollups
+			console.log('TODO')
+			console.log('assign contract', createdAddress.toString(), 'storage to rollup', rollupId)
+			console.log('remove contract', createdAddress.toString(), 'storage from rollup', rollupIdPrevious)
 		}
 	} else if (tx.type === 'rollup') {
 		if (tx.action === 'call_contract') {
