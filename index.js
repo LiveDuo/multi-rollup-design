@@ -39,7 +39,11 @@ const processTransaction = async (tx) => {
 			return result
 
 		} else if (tx.action === 'reassign_contract') {
-			console.log('TODO reassign')
+			const [createdAddress, rollupId] = tx.data
+			console.log('TODO reassign', createdAddress.toString(), 'to', rollupId)
+			// remove contract from rollup 0
+			// assign contract to rollup 1
+			// update rollup id in rollup hub
 		}
 	} else if (tx.type === 'rollup') {
 		if (tx.action === 'call_contract') {
@@ -89,7 +93,7 @@ const runMultipleTxs = async (vm, count) => {
 	await submitTransaction({ type: 'rollup', typeParams: [1], action: 'call_contract', actionParams: [result2.createdAddress], data: '' })
 
 	// reassign contract
-	await submitTransaction({ type: 'hub', action: 'reassign_contract', data: result2.createdAddress })
+	await submitTransaction({ type: 'hub', action: 'reassign_contract', data: [result2.createdAddress, 0] })
 
 	// debug
 	console.log('hub', util.inspect(executionLayer.hub, { depth: null }))
