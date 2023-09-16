@@ -1,5 +1,3 @@
-const util = require('util')
-
 const { VM } = require('@ethereumjs/vm')
 const { Wallet } = require('@ethereumjs/wallet')
 const { TransactionFactory } = require('@ethereumjs/tx')
@@ -41,19 +39,34 @@ const processTransaction = async (tx) => {
 
 		} else if (tx.action === 'reassign_contract') {
 			
-			// update rollup hub
+			return
+
 			const [createdAddress, rollupId] = tx.data
 			const rollupIdFrom = executionLayer['hub'].contracts[createdAddress].rollupId
-			// executionLayer['hub'].contracts[createdAddress] = { rollupId }
+			const rollupTo = executionLayer['rollups'][rollupId]
+			const rollupFrom = executionLayer['rollups'][rollupIdFrom]
+			
+			// update rollup hub
+			executionLayer['hub'].contracts[createdAddress] = { rollupId }
+
+			// assign contract account to new rollup
+			const account = await rollupFrom.vm.stateManager.getAccount(createdAddress)
+			await rollupTo.vm.stateManager.putAccount(createdAddress, account)
+
+			// assign contract code to new rollup
+			const code = await rollupFrom.vm.stateManager.getContractCode(createdAddress)
+			await rollupTo.vm.stateManager.putContractCode(createdAddress, code)
+
+			// assign contract storage to new rollup
+			const storage = await rollupFrom.vm.stateManager.dumpStorage(createdAddress)
+			for (const [k, v] of Object.entries(storage)) {
+				const key = new Uint8Array(Buffer.from(k.substring(2), 'hex'))
+				const value = new Uint8Array(Buffer.from(v.substring(2), 'hex'))
+				await rollupTo.vm.stateManager.putContractStorage(createdAddress, key, value)
+			}
 
 			// remove state from rollup
-			console.log('TODO remove contract', createdAddress.toString(), 'storage from rollup', rollupIdFrom)
-			
-			// const rollupFrom = executionLayer['rollups'][rollupIdFrom]
-			// await rollupFrom.vm.stateManager.clearContractStorage(createdAddress)
-			
-			// assign state to new rollup
-			console.log('TODO assign contract', createdAddress.toString(), 'storage to rollup', rollupId)
+			await rollupFrom.vm.stateManager.clearContractStorage(createdAddress)
 			
 		}
 	} else if (tx.type === 'rollup') {
