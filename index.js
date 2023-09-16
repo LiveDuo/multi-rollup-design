@@ -3,6 +3,7 @@ const util = require('util')
 const { VM } = require('@ethereumjs/vm')
 const { Wallet } = require('@ethereumjs/wallet')
 const { TransactionFactory } = require('@ethereumjs/tx')
+const { Address } = require('@ethereumjs/util')
 
 // constants
 const GAS_PRICE = '0x10', GAS_LIMIT = '0x20000'
@@ -43,15 +44,16 @@ const processTransaction = async (tx) => {
 			// update rollup hub
 			const [createdAddress, rollupId] = tx.data
 			const rollupIdFrom = executionLayer['hub'].contracts[createdAddress].rollupId
-			executionLayer['hub'].contracts[createdAddress] = { rollupId }
+			// executionLayer['hub'].contracts[createdAddress] = { rollupId }
 
 			// remove state from rollup
-			const rollupFrom = executionLayer['rollups'][rollupIdFrom]
-			await rollupFrom.vm.stateManager.clearContractStorage(createdAddress)
+			console.log('TODO remove contract', createdAddress.toString(), 'storage from rollup', rollupIdFrom)
+			
+			// const rollupFrom = executionLayer['rollups'][rollupIdFrom]
+			// await rollupFrom.vm.stateManager.clearContractStorage(createdAddress)
 			
 			// assign state to new rollup
-			console.log('TODO')
-			console.log('assign contract', createdAddress.toString(), 'storage to rollup', rollupId)
+			console.log('TODO assign contract', createdAddress.toString(), 'storage to rollup', rollupId)
 			
 		}
 	} else if (tx.type === 'rollup') {
@@ -67,11 +69,6 @@ const processTransaction = async (tx) => {
 			const tx2 = unsignedTx2.sign(senderWallet.getPrivateKey())
 			const result = await rollup.vm.runTx({ tx: tx2, skipBalance: true, skipNonce: true })
 
-			// update rollup
-			const contractStorage = await rollup.vm.stateManager.dumpStorage(contractAddress)
-			const storage = { ...rollup, storage: { [contractAddress]: contractStorage } }
-			executionLayer['rollups'][rollupId] = storage
-
 			return result
 		}
 	}
@@ -79,7 +76,7 @@ const processTransaction = async (tx) => {
 
 const submitTransaction = async (tx) => { daLayer.push(tx); const result = await processTransaction(tx); return result }
 
-const cleanupRollups = (rollups) => Object.entries(rollups).reduce((p, [k, v]) => { p[k] = { storage: v.storage }; return p }, {})
+// const cleanupRollups = (rollups) => Object.entries(rollups).reduce((p, [k, v]) => { p[k] = { storage: v.storage }; return p }, {})
 
 const runMultipleTxs = async (vm, count) => {
 	for(let i = 0; i < count; i++){
@@ -105,8 +102,11 @@ const runMultipleTxs = async (vm, count) => {
 	await submitTransaction({ type: 'hub', action: 'reassign_contract', data: [result2.createdAddress, 0] })
 
 	// debug
-	console.log('hub', util.inspect(executionLayer.hub, { depth: null }))
-	console.log('rollups', util.inspect(cleanupRollups(executionLayer.rollups), { depth: null }))
+	for ([address, data] of Object.entries(executionLayer.hub.contracts)) {
+		const storage = await executionLayer.rollups[data.rollupId].vm.stateManager.dumpStorage(Address.fromString(address))
+		console.log('Address', address, '-', 'Rollup Id', data.rollupId)
+		console.log(storage)
+	}
 
 })()
 
