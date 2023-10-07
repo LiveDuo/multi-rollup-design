@@ -4,7 +4,7 @@ const assert = require('node:assert')
 const { OP_CODES, submitTransaction, queryState, debug } = require('../lib')
 
 // node --test
-test('should pass', async () => {
+test('create 2 contracts and reassign one of them', async () => {
     
     // create contract 1
 	const code = [OP_CODES.PUSH1, '02', OP_CODES.PUSH1, '03', OP_CODES.SSTORE]
