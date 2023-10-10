@@ -10,6 +10,7 @@ const port = argv.port ?? 8000
 const server = new JSONRPCServer()
 server.addMethod('log', (message) => console.log(message))
 server.addMethod('echo', (message) => message)
+server.addMethod('ping', () => 'pong')
 
 server.addMethod('add_rollup', (message) => message)
 server.addMethod('remove_rollup', (message) => message)
