@@ -12,11 +12,21 @@ server.addMethod('log', (message) => console.log(message))
 server.addMethod('echo', (message) => message)
 server.addMethod('ping', () => 'pong')
 
-server.addMethod('add_rollup', (message) => message)
-server.addMethod('remove_rollup', (message) => message)
-server.addMethod('create_contract', (message) => message)
-server.addMethod('reassign_contract', (message) => message)
-server.addMethod('call_contract', (message) => message)
+server.addMethod('add_rollup', async () => {
+	return await submitTransaction({ type: 'hub', action: 'add_rollup' })
+})
+server.addMethod('remove_rollup', async (message) => {
+	return await submitTransaction({ type: 'hub', action: 'remove_rollup', actionParams: [message[0]] })
+})
+server.addMethod('create_contract', async (message) => {
+	return await submitTransaction({ type: 'hub', action: 'create_contract', data: message[0] })
+})
+server.addMethod('reassign_contract', async (message) => {
+	await submitTransaction({ type: 'hub', action: 'reassign_contract', data: [message[0], message[1]] })
+})
+server.addMethod('call_contract', async (message) => {
+	await submitTransaction({ type: 'rollup', action: 'call_contract', actionParams: [message[0]], data: '' })
+})
 
 const app = express()
 app.use(bodyParser.json())
