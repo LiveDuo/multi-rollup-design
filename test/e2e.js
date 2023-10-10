@@ -21,12 +21,24 @@ test('e2e: create 2 contracts and reassign one of them', async () => {
     const node2 = spawn('node', ['index.js', '--port', nodeOptions2.port])
     await new Promise(r => setTimeout(r, 2000)) // TODO wait ping
 
-    // call node 1
+    // TODO
+    // create rollup 1
+	// create rollup 2
+	// create contract 1
+	// create contract 2
+	// call contract 1
+	// call contract 1
+	// call contract 2
+	// reassign contract 2
+	// call contract 2
+    
+    
+    // call node 1 (example)
     const nodeUrl = `http://${nodeOptions.address}:${nodeOptions.port}`
     const res = await rpcRequest(nodeUrl, 'echo', ['params'])
     assert.deepStrictEqual(res, ['params'])
     
-    // call node 2
+    // call node 2 (example)
     const nodeUrl2 = `http://${nodeOptions.address}:${nodeOptions.port}`
     const res2 = await rpcRequest(nodeUrl2, 'echo', ['params'])
     assert.deepStrictEqual(res2, ['params'])
