@@ -3,8 +3,8 @@ const assert = require('node:assert')
 
 const { OP_CODES, submitTransaction, queryState, queryHub, debug } = require('../lib')
 
-// node --test
-test('create 2 contracts and reassign one of them', async () => {
+// node --test test/integration.js
+test('integration: create 2 contracts and reassign one of them', async () => {
     
     // create rollup 1
 	const addResult = await submitTransaction({ type: 'hub', action: 'add_rollup' })
