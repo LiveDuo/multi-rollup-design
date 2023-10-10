@@ -8,8 +8,14 @@ const port = argv.port ?? 8000
 
 // https://www.npmjs.com/package/json-rpc-2.0
 const server = new JSONRPCServer()
-server.addMethod('echo', (message) => message)
 server.addMethod('log', (message) => console.log(message))
+server.addMethod('echo', (message) => message)
+
+server.addMethod('add_rollup', (message) => message)
+server.addMethod('remove_rollup', (message) => message)
+server.addMethod('create_contract', (message) => message)
+server.addMethod('reassign_contract', (message) => message)
+server.addMethod('call_contract', (message) => message)
 
 const app = express()
 app.use(bodyParser.json())
