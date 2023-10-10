@@ -25,18 +25,22 @@ const waitRpcServer = async (nodeUrl) => {
     }
 }
 
+const logSpawn = (node) => {
+    node.stderr.on('data', (d) => console.log('stderr:', d.toString()))
+    node.stdout.on('data', (d) => console.log('stdout:', d.toString()))
+}
+
 // node --test test/e2e.js
 test('e2e: create 2 contracts and reassign one of them', async () => {
     
     // start node 1
     const nodeOptions = { address: 'localhost', port: 8001 }
     const node = spawn('node', ['index.js', '--port', nodeOptions.port])
-    node.stderr.on('data', (d) => console.log('stderr:', d.toString()))
-    node.stdout.on('data', (d) => console.log('stdout:', d.toString()))
-
     const nodeUrl = `http://${nodeOptions.address}:${nodeOptions.port}`
     await waitRpcServer(nodeUrl)
     
+    logSpawn(node)
+
     // start node 2
     const nodeOptions2 = { address: 'localhost', port: 8002 }
     const node2 = spawn('node', ['index.js', '--port', nodeOptions2.port])
@@ -51,29 +55,30 @@ test('e2e: create 2 contracts and reassign one of them', async () => {
     const addResult2 = await rpcRequest(nodeUrl, 'add_rollup', [])
     assert.strictEqual(addResult2.rollupId, 1)
 
-    // const code = [OP_CODES.PUSH1, '02', OP_CODES.PUSH1, '03', OP_CODES.SSTORE]
-    // const createResult = await rpcRequest(nodeUrl, 'create_contract', ['0x' + code.join('')])
-    // console.log(2, createResult)
-    // assert.deepStrictEqual(createResult, ['params'])
-    
-    // TODO
 	// create contract 1
-	// create contract 2
-	// call contract 1
-	// call contract 1
-	// call contract 2
-	// reassign contract 2
-	// call contract 2
+    const code = [OP_CODES.PUSH1, '02', OP_CODES.PUSH1, '03', OP_CODES.SSTORE]
+    const createResult = await rpcRequest(nodeUrl, 'create_contract', ['0x' + code.join('')])
+    assert.deepStrictEqual(createResult.createdAddress.substring(2).length, 40)
+	
+    // create contract 2
+    const code2 = [OP_CODES.PUSH1, '04', OP_CODES.PUSH1, '05', OP_CODES.SSTORE]
+    const createResult2 = await rpcRequest(nodeUrl, 'create_contract', ['0x' + code2.join('')])
+    assert.deepStrictEqual(createResult2.createdAddress.substring(2).length, 40)
     
+    // call contract 1
+    await rpcRequest(nodeUrl, 'call_contract', [createResult.createdAddress.toString()])
     
-    // call node 1 (example)
-    const res = await rpcRequest(nodeUrl, 'echo', ['params'])
-    assert.deepStrictEqual(res, ['params'])
+    // call contract 1
+    await rpcRequest(nodeUrl, 'call_contract', [createResult.createdAddress.toString()])
     
-    // call node 2 (example)
-    const res2 = await rpcRequest(nodeUrl2, 'echo', ['params'])
-    assert.deepStrictEqual(res2, ['params'])
+    // call contract 2
+    await rpcRequest(nodeUrl, 'call_contract', [createResult2.createdAddress.toString()])
+    
+    // TODO reassign contract 2
 
+    // call contract 2
+    await rpcRequest(nodeUrl, 'call_contract', [createResult2.createdAddress.toString()])
+    
     // stop nodes
     node.kill()
     node2.kill()
