@@ -6,6 +6,8 @@ const { JSONRPCServer } = require('json-rpc-2.0')
 const argv = minimist(process.argv.slice(2))
 const port = argv.port ?? 8000
 
+const { submitTransaction } = require('./lib')
+
 // https://www.npmjs.com/package/json-rpc-2.0
 const server = new JSONRPCServer()
 server.addMethod('log', (message) => console.log(message))
