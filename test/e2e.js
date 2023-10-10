@@ -3,6 +3,8 @@ const assert = require('node:assert')
 const fetch = require('node-fetch')
 const { spawn } = require('node:child_process')
 
+const { OP_CODES } = require('../lib')
+
 const rpcRequest = async (url, method, params) => {
     const request = {jsonrpc: '2.0', method, id: 1, params}
     const requestParams = { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(request) }
@@ -29,6 +31,9 @@ test('e2e: create 2 contracts and reassign one of them', async () => {
     // start node 1
     const nodeOptions = { address: 'localhost', port: 8001 }
     const node = spawn('node', ['index.js', '--port', nodeOptions.port])
+    node.stderr.on('data', (d) => console.log('stderr:', d.toString()))
+    node.stdout.on('data', (d) => console.log('stdout:', d.toString()))
+
     const nodeUrl = `http://${nodeOptions.address}:${nodeOptions.port}`
     await waitRpcServer(nodeUrl)
     
@@ -38,9 +43,20 @@ test('e2e: create 2 contracts and reassign one of them', async () => {
     const nodeUrl2 = `http://${nodeOptions2.address}:${nodeOptions2.port}`
     await waitRpcServer(nodeUrl2)
 
-    // TODO
     // create rollup 1
-	// create rollup 2
+    const addResult = await rpcRequest(nodeUrl, 'add_rollup', [])
+    assert.strictEqual(addResult.rollupId, 0)
+    
+    // create rollup 2
+    const addResult2 = await rpcRequest(nodeUrl, 'add_rollup', [])
+    assert.strictEqual(addResult2.rollupId, 1)
+
+    // const code = [OP_CODES.PUSH1, '02', OP_CODES.PUSH1, '03', OP_CODES.SSTORE]
+    // const createResult = await rpcRequest(nodeUrl, 'create_contract', ['0x' + code.join('')])
+    // console.log(2, createResult)
+    // assert.deepStrictEqual(createResult, ['params'])
+    
+    // TODO
 	// create contract 1
 	// create contract 2
 	// call contract 1
