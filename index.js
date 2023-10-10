@@ -1,6 +1,10 @@
+const minimist = require('minimist')
 const express = require('express')
 const bodyParser = require('body-parser')
 const { JSONRPCServer } = require('json-rpc-2.0')
+
+const argv = minimist(process.argv.slice(2))
+const port = argv.port ?? 8000
 
 // https://www.npmjs.com/package/json-rpc-2.0
 const server = new JSONRPCServer()
@@ -17,4 +21,4 @@ app.post('/', async (req, res) => {
 	res.json(rpcRes)
 })
 
-app.listen(8005)
+app.listen(port)
