@@ -15,16 +15,20 @@ const rpcRequest = async (url, method, params) => {
 test('e2e: create 2 contracts and reassign one of them', async () => {
     
     // start node
-    const node = spawn('node', ['index.js', '--port', 8001])
-    const node2 = spawn('node', ['index.js', '--port', 8002])
+    const nodeOptions = { address: 'localhost', port: 8001 }
+    const node = spawn('node', ['index.js', '--port', nodeOptions.port])
+    const nodeOptions2 = { address: 'localhost', port: 8001 }
+    const node2 = spawn('node', ['index.js', '--port', nodeOptions2.port])
     await new Promise(r => setTimeout(r, 2000)) // TODO wait ping
 
     // call node 1
-    const res = await rpcRequest(`http://localhost:${8001}`, 'echo', ['params'])
+    const nodeUrl = `http://${nodeOptions.address}:${nodeOptions.port}`
+    const res = await rpcRequest(nodeUrl, 'echo', ['params'])
     assert.deepStrictEqual(res, ['params'])
     
     // call node 2
-    const res2 = await rpcRequest(`http://localhost:${8002}`, 'echo', ['params'])
+    const nodeUrl2 = `http://${nodeOptions.address}:${nodeOptions.port}`
+    const res2 = await rpcRequest(nodeUrl2, 'echo', ['params'])
     assert.deepStrictEqual(res2, ['params'])
 
     // stop nodes
