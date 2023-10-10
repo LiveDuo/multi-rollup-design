@@ -21,7 +21,8 @@ server.addMethod('remove_rollup', async (message) => {
 	return await submitTransaction({ type: 'hub', action: 'remove_rollup', actionParams: [message[0]] })
 })
 server.addMethod('create_contract', async (message) => {
-	return await submitTransaction({ type: 'hub', action: 'create_contract', data: message[0] })
+	const createResult = await submitTransaction({ type: 'hub', action: 'create_contract', data: message[0] })
+	return { createdAddress: createResult.createdAddress.toString() }
 })
 server.addMethod('reassign_contract', async (message) => {
 	await submitTransaction({ type: 'hub', action: 'reassign_contract', data: [message[0], message[1]] })
