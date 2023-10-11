@@ -36,14 +36,14 @@ wss.on('connection', (ws) => {
 
 		// check
 		const tx = parseTransaction(message)
-		if (!!tx) return ws.send('Invalid message')
+		if (!tx) return ws.send('Invalid message')
 
 		// store
 		transactions.push(tx)
 
 		// broadcast
 		wss.clients.forEach((client) => {
-			if (client !== ws) ws.send(message)
+			if (client.id !== ws.id) ws.send(message)
 		})
 
   })
