@@ -12,11 +12,11 @@ const { processTransaction, queryState: queryStateInner } = require('./lib')
 
 const ws = new WebSocket(daWsUrl)
 ws.on('open', () => {
-	console.log('da websocket connected')
+	console.log('Da websocket connected')
 })
 ws.on('message', async (message) => {
 	const tx = JSON.parse(message.toString())
-	// await processTransaction(tx) // TODO
+	await processTransaction(tx)
 })
 
 const submitTransaction = async (tx) => {

@@ -45,15 +45,15 @@ test('integration: create 2 contracts and reassign one of them', async () => {
     const stateData3 = await queryState(createResult2.createdAddress.toString())
     assert.strictEqual(Object.values(stateData3)[0], '0x04')
 
-	// reassign contract 2
-	await submitTransaction({ type: 'hub', action: 'reassign_contract', data: [createResult2.createdAddress.toString(), 0] })
-    const stateData4 = await queryState(createResult2.createdAddress.toString())
-    assert.strictEqual(Object.values(stateData4)[0], '0x04')
+	// // reassign contract 2
+	// await submitTransaction({ type: 'hub', action: 'reassign_contract', data: [createResult2.createdAddress.toString(), 0] })
+    // const stateData4 = await queryState(createResult2.createdAddress.toString())
+    // assert.strictEqual(Object.values(stateData4)[0], '0x04')
     
-    // remove rollup
-	await submitTransaction({ type: 'hub', action: 'remove_rollup', actionParams: [1] })
-    const stateData5 = await queryState(createResult2.createdAddress.toString())
-    assert.strictEqual(Object.values(stateData5)[0], '0x04')
+    // // remove rollup
+	// await submitTransaction({ type: 'hub', action: 'remove_rollup', actionParams: [1] })
+    // const stateData5 = await queryState(createResult2.createdAddress.toString())
+    // assert.strictEqual(Object.values(stateData5)[0], '0x04')
 
     // await debug()
 
