@@ -12,6 +12,16 @@ const wss = new WebSocket.Server({ server })
 const argv = minimist(process.argv.slice(2))
 const port = argv.port ?? 9000
 
+const transactions = []
+
+const parseTransaction = (message) => {
+	try {
+		return JSON.parse(message)
+	} catch (error) {
+		return undefined
+	}
+}
+
 // wscat -c ws://localhost:8080
 wss.on('connection', (ws) => {
 
@@ -20,10 +30,22 @@ wss.on('connection', (ws) => {
 	console.log('Connected', `(id=${ws.id})`)
 
 	// message
-	// NOTE: send to all with `wss.clients`
   ws.on('message', (message) => {
+		
 		console.log('Received', message.toString(), `(id=${ws.id})`)
-		ws.send(`Echo: ${message}`)
+
+		// check
+		const tx = parseTransaction(message)
+		if (!!tx) return ws.send('Invalid message')
+
+		// store
+		transactions.push(tx)
+
+		// broadcast
+		wss.clients.forEach((client) => {
+			if (client !== ws) ws.send(message)
+		})
+
   })
 })
 
