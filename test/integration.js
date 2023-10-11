@@ -14,13 +14,15 @@ test('integration: create 2 contracts and reassign one of them', async () => {
     
     // create rollup 1
 	const addResult = await submitTransaction({ type: 'hub', action: 'add_rollup' })
-    const rollupData = await queryHub(addResult.rollupId)
-    assert.strictEqual(!!rollupData, true)
-    
+    assert.strictEqual(addResult.rollupId, 0)
+
     // create rollup 2
 	const addResult2 = await submitTransaction({ type: 'hub', action: 'add_rollup' })
-    const rollupData2 = await queryHub(addResult2.rollupId)
-    assert.strictEqual(!!rollupData2, true)
+    assert.strictEqual(addResult2.rollupId, 1)
+    
+    // check hub
+    const hubData = await queryHub()
+    assert.strictEqual(hubData.count, 2)
 
     // create contract 1
 	const code = [OP_CODES.PUSH1, '02', OP_CODES.PUSH1, '03', OP_CODES.SSTORE]
