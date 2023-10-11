@@ -3,11 +3,9 @@ const assert = require('node:assert')
 
 const { OP_CODES, processTransaction, queryState: queryStateInner, queryHub: queryHubInner, debug } = require('../lib')
 
-const daCache = []
 const executionLayer = { rollups: {}, hub: { contracts: {} } }
 
 const submitTransaction = async (tx) => {
-    daCache.push(tx)
     return await processTransaction(executionLayer, tx)
 }
 const queryHub = (rollupId) => queryHubInner(executionLayer, rollupId)
