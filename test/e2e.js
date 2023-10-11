@@ -14,6 +14,8 @@ test('e2e: create 2 contracts and reassign one of them', async () => {
     const wsUrl = `ws://${daOptions.address}:${daOptions.port}`
     await waitWsServer(wsUrl)
 
+    logSpawn(da)
+
     // start node 1
     const nodeOptions = { address: 'localhost', port: 8001 }
     const node = spawn('node', ['index.js', '--port', nodeOptions.port, '--da', wsUrl])
