@@ -1,12 +1,21 @@
 const test = require('node:test')
 const assert = require('node:assert')
 
+// const EventEmitter = require('node:events')
+
 const { OP_CODES, processTransaction, queryState: queryStateInner, queryHub: queryHubInner, debug } = require('../lib')
 
 const daLayer = []
 const executionLayer = { rollups: {}, hub: { contracts: {} } }
 
-const submitTransaction = async (tx) => { daLayer.push(tx); const result = await processTransaction(executionLayer, tx); return result }
+// const daEmitter = new EventEmitter()
+// daEmitter.on('event', () => {})
+
+const submitTransaction = async (tx) => {
+    daLayer.push(tx);
+    // daEmitter.emit('tx', tx);
+    return await processTransaction(executionLayer, tx)
+}
 const queryHub = (rollupId) => queryHubInner(executionLayer, rollupId)
 const queryState = (address) => queryStateInner(executionLayer, address)
 

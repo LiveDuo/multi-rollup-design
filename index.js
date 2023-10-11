@@ -11,7 +11,12 @@ const { processTransaction, queryState: queryStateInner } = require('./lib')
 const daLayer = []
 const executionLayer = { rollups: {}, hub: { contracts: {} } }
 
-const submitTransaction = async (tx) => { daLayer.push(tx); const result = await processTransaction(executionLayer, tx); return result }
+const submitTransaction = async (tx) => {
+	daLayer.push(tx)
+	const result = await processTransaction(executionLayer, tx)
+	// TODO trigger subscription
+	return result
+}
 const queryState = (address) => queryStateInner(executionLayer, address)
 
 // https://www.npmjs.com/package/json-rpc-2.0
@@ -39,6 +44,11 @@ server.addMethod('call_contract', async (message) => {
 server.addMethod('query_state', async (message) => {
 	return await queryState(message[0])
 })
+/*
+server.addSubscription('subscribe_tx'), async (message) => {
+	// TODO process tx
+}
+*/
 
 const app = express()
 app.use(bodyParser.json())
