@@ -9,7 +9,7 @@ const port = argv.port ?? 8000
 const { processTransaction, queryState: queryStateInner } = require('./lib')
 
 const daLayer = []
-const executionLayer = { rollups: {}, hub: { contracts: {}, sequencers: {} } }
+const executionLayer = { rollups: {}, hub: { contracts: {} } }
 
 const submitTransaction = async (tx) => { daLayer.push(tx); const result = await processTransaction(executionLayer, tx); return result }
 const queryState = (address) => queryStateInner(executionLayer, address)

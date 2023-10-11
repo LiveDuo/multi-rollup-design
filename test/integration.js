@@ -4,7 +4,7 @@ const assert = require('node:assert')
 const { OP_CODES, processTransaction, queryState: queryStateInner, queryHub: queryHubInner, debug } = require('../lib')
 
 const daLayer = []
-const executionLayer = { rollups: {}, hub: { contracts: {}, sequencers: {} } }
+const executionLayer = { rollups: {}, hub: { contracts: {} } }
 
 const submitTransaction = async (tx) => { daLayer.push(tx); const result = await processTransaction(executionLayer, tx); return result }
 const queryHub = (rollupId) => queryHubInner(executionLayer, rollupId)
