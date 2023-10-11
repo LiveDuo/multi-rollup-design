@@ -25,26 +25,29 @@ test('integration: create 2 contracts and reassign one of them', async () => {
 	const createResult2 = await submitTransaction({ type: 'hub', action: 'create_contract', data: '0x' + code2.join('') })
 
 	// call contract 1
-	await submitTransaction({ type: 'rollup', action: 'call_contract', actionParams: [createResult.createdAddress], data: '' })
+	await submitTransaction({ type: 'rollup', action: 'call_contract', actionParams: [createResult.createdAddress.toString()], data: '' })
     const stateData = await queryState(createResult.createdAddress.toString())
     assert.strictEqual(Object.values(stateData)[0], '0x02')
 
     // call contract 1
-	await submitTransaction({ type: 'rollup', action: 'call_contract', actionParams: [createResult.createdAddress], data: '' })
+	await submitTransaction({ type: 'rollup', action: 'call_contract', actionParams: [createResult.createdAddress.toString()], data: '' })
     const stateData2 = await queryState(createResult.createdAddress.toString())
     assert.strictEqual(Object.values(stateData2)[0], '0x02')
 
     // call contract 2
-	await submitTransaction({ type: 'rollup', action: 'call_contract', actionParams: [createResult2.createdAddress], data: '' })
+	await submitTransaction({ type: 'rollup', action: 'call_contract', actionParams: [createResult2.createdAddress.toString()], data: '' })
     const stateData3 = await queryState(createResult2.createdAddress.toString())
     assert.strictEqual(Object.values(stateData3)[0], '0x04')
 
 	// reassign contract 2
-	await submitTransaction({ type: 'hub', action: 'reassign_contract', data: [createResult2.createdAddress, 0] })
-
-    // call contract 2
+	await submitTransaction({ type: 'hub', action: 'reassign_contract', data: [createResult2.createdAddress.toString(), 0] })
     const stateData4 = await queryState(createResult2.createdAddress.toString())
     assert.strictEqual(Object.values(stateData4)[0], '0x04')
+    
+    // remove rollup
+	await submitTransaction({ type: 'hub', action: 'remove_rollup', actionParams: [1] })
+    const stateData5 = await queryState(createResult2.createdAddress.toString())
+    assert.strictEqual(Object.values(stateData5)[0], '0x04')
 
     // await debug()
 
