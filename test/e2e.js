@@ -3,7 +3,7 @@ const assert = require('node:assert')
 const fetch = require('node-fetch')
 const { spawn } = require('node:child_process')
 
-const WebSocket = require('ws');
+const WebSocket = require('ws')
 
 const { OP_CODES } = require('../lib')
 
@@ -60,7 +60,7 @@ test('e2e: create 2 contracts and reassign one of them', async () => {
 
     // start node 1
     const nodeOptions = { address: 'localhost', port: 8001 }
-    const node = spawn('node', ['index.js', '--port', nodeOptions.port])
+    const node = spawn('node', ['index.js', '--port', nodeOptions.port, '--da', wsUrl])
     const nodeUrl = `http://${nodeOptions.address}:${nodeOptions.port}`
     await waitRpcServer(nodeUrl)
     
@@ -68,7 +68,7 @@ test('e2e: create 2 contracts and reassign one of them', async () => {
 
     // start node 2
     const nodeOptions2 = { address: 'localhost', port: 8002 }
-    const node2 = spawn('node', ['index.js', '--port', nodeOptions2.port])
+    const node2 = spawn('node', ['index.js', '--port', nodeOptions2.port, '--da', wsUrl])
     const nodeUrl2 = `http://${nodeOptions2.address}:${nodeOptions2.port}`
     await waitRpcServer(nodeUrl2)
 

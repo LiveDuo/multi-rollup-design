@@ -2,19 +2,27 @@ const minimist = require('minimist')
 const express = require('express')
 const bodyParser = require('body-parser')
 const { JSONRPCServer } = require('json-rpc-2.0')
+const WebSocket = require('ws')
 
 const argv = minimist(process.argv.slice(2))
 const port = argv.port ?? 8000
+const daWsUrl = argv.da ?? 'ws://localhost:9000'
 
 const { processTransaction, queryState: queryStateInner } = require('./lib')
 
 const daLayer = []
 const executionLayer = { rollups: {}, hub: { contracts: {} } }
 
+const ws = new WebSocket(daWsUrl)
+ws.onopen = () => {
+	console.log('da websocket connected')
+	// TODO process received txs
+}
+
 const submitTransaction = async (tx) => {
 	daLayer.push(tx)
+	// TODO send to da websocket
 	const result = await processTransaction(executionLayer, tx)
-	// TODO trigger subscription
 	return result
 }
 const queryState = (address) => queryStateInner(executionLayer, address)
@@ -44,11 +52,6 @@ server.addMethod('call_contract', async (message) => {
 server.addMethod('query_state', async (message) => {
 	return await queryState(message[0])
 })
-/*
-server.addSubscription('subscribe_tx'), async (message) => {
-	// TODO process tx
-}
-*/
 
 const app = express()
 app.use(bodyParser.json())
