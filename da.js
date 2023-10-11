@@ -1,3 +1,6 @@
+
+
+const minimist = require('minimist')
 const express = require('express')
 const http = require('http')
 const WebSocket = require('ws')
@@ -6,7 +9,8 @@ const app = express()
 const server = http.createServer(app)
 const wss = new WebSocket.Server({ server })
 
-const PORT = 8080
+const argv = minimist(process.argv.slice(2))
+const port = argv.port ?? 9000
 
 // wscat -c ws://localhost:8080
 wss.on('connection', (ws) => {
@@ -23,6 +27,6 @@ wss.on('connection', (ws) => {
   })
 })
 
-server.listen(PORT, () => {
-  console.log('Wss started on port', PORT)
+server.listen(port, () => {
+  console.log('Wss started on port', port)
 })
