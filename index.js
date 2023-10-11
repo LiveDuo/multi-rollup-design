@@ -10,23 +10,21 @@ const daWsUrl = argv.da ?? 'ws://localhost:9000'
 
 const { processTransaction, queryState: queryStateInner } = require('./lib')
 
-const executionLayer = { rollups: {}, hub: { contracts: {} } }
-
 const ws = new WebSocket(daWsUrl)
 ws.on('open', () => {
 	console.log('da websocket connected')
 })
 ws.on('message', async (message) => {
 	const tx = JSON.parse(message.toString())
-	// await processTransaction(executionLayer, tx) // TODO
+	// await processTransaction(tx) // TODO
 })
 
 const submitTransaction = async (tx) => {
 	ws.send(JSON.stringify(tx))
-	const result = await processTransaction(executionLayer, tx)
+	const result = await processTransaction(tx)
 	return result
 }
-const queryState = (address) => queryStateInner(executionLayer, address)
+const queryState = (address) => queryStateInner(address)
 
 // https://www.npmjs.com/package/json-rpc-2.0
 const server = new JSONRPCServer()
