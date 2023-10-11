@@ -6,7 +6,7 @@ const { JSONRPCServer } = require('json-rpc-2.0')
 const argv = minimist(process.argv.slice(2))
 const port = argv.port ?? 8000
 
-const { submitTransaction } = require('./lib')
+const { submitTransaction, queryState } = require('./lib')
 
 // https://www.npmjs.com/package/json-rpc-2.0
 const server = new JSONRPCServer()
@@ -29,6 +29,9 @@ server.addMethod('reassign_contract', async (message) => {
 })
 server.addMethod('call_contract', async (message) => {
 	await submitTransaction({ type: 'rollup', action: 'call_contract', actionParams: [message[0]], data: '' })
+})
+server.addMethod('query_state', async (message) => {
+	return await queryState(message[0])
 })
 
 const app = express()
