@@ -80,7 +80,8 @@ test('e2e: create 2 contracts and reassign one of them', async () => {
     const stateData3 = await rpcRequest(nodeUrl, 'query_state', [createResult2.createdAddress.toString()])
     assert.deepStrictEqual(Object.values(stateData3)[0], '0x04')
 
-    // TODO reassign contract 2
+    // reassign contract 2
+    await rpcRequest(nodeUrl, 'call_contract', [createResult2.createdAddress.toString(), 0])
 
     // call contract 2
     await rpcRequest(nodeUrl, 'call_contract', [createResult2.createdAddress.toString()])
