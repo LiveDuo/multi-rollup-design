@@ -10,18 +10,18 @@ const daWsUrl = argv.da ?? 'ws://localhost:9000'
 
 const { processTransaction, queryState: queryStateInner } = require('./lib')
 
-const daLayer = []
+const daCache = []
 const executionLayer = { rollups: {}, hub: { contracts: {} } }
 
 const ws = new WebSocket(daWsUrl)
 ws.onopen = () => {
 	console.log('da websocket connected')
-	// TODO process received txs
+	// TODO process received hub txs
 }
 
 const submitTransaction = async (tx) => {
-	daLayer.push(tx)
-	// TODO send to da websocket
+	ws.send(JSON.stringify(tx))
+	daCache.push(tx)
 	const result = await processTransaction(executionLayer, tx)
 	return result
 }
