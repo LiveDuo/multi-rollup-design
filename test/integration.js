@@ -1,7 +1,14 @@
 const test = require('node:test')
 const assert = require('node:assert')
 
-const { OP_CODES, submitTransaction, queryState, queryHub, debug } = require('../lib')
+const { OP_CODES, processTransaction, queryState: queryStateInner, queryHub: queryHubInner, debug } = require('../lib')
+
+const daLayer = []
+const executionLayer = { rollups: {}, hub: { contracts: {}, sequencers: {} } }
+
+const submitTransaction = async (tx) => { daLayer.push(tx); const result = await processTransaction(executionLayer, tx); return result }
+const queryHub = (rollupId) => queryHubInner(executionLayer, rollupId)
+const queryState = (address) => queryStateInner(executionLayer, address)
 
 // node --test test/integration.js
 test('integration: create 2 contracts and reassign one of them', async () => {

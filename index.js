@@ -6,7 +6,13 @@ const { JSONRPCServer } = require('json-rpc-2.0')
 const argv = minimist(process.argv.slice(2))
 const port = argv.port ?? 8000
 
-const { submitTransaction, queryState } = require('./lib')
+const { processTransaction, queryState: queryStateInner } = require('./lib')
+
+const daLayer = []
+const executionLayer = { rollups: {}, hub: { contracts: {}, sequencers: {} } }
+
+const submitTransaction = async (tx) => { daLayer.push(tx); const result = await processTransaction(executionLayer, tx); return result }
+const queryState = (address) => queryStateInner(executionLayer, address)
 
 // https://www.npmjs.com/package/json-rpc-2.0
 const server = new JSONRPCServer()
