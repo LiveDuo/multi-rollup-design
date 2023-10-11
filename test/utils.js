@@ -36,8 +36,8 @@ const waitWsServer = async (wsUrl) => {
         try {
             await new Promise ((r, e) => {
                 const ws = new WebSocket(wsUrl)
-                ws.onopen = r
-                ws.onerror = e
+                ws.onopen = () => { r(); ws.close() }
+                ws.onerror = () => { e(); ws.close() }
             })
             break
         } catch (error) {
