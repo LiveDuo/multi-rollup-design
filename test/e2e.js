@@ -3,6 +3,8 @@ const assert = require('node:assert')
 const fetch = require('node-fetch')
 const { spawn } = require('node:child_process')
 
+const WebSocket = require('ws');
+
 const { OP_CODES } = require('../lib')
 
 const rpcRequest = async (url, method, params) => {
@@ -20,7 +22,24 @@ const waitRpcServer = async (nodeUrl) => {
             const res = await rpcRequest(nodeUrl, 'ping', [])
             if (res === 'pong') { break } else { throw new Error('Server unavailable') }
         } catch (error) {
-            await new Promise(r => setTimeout(r, 200))
+            await new Promise(r => setTimeout(r, 100))
+        }
+    }
+}
+
+const waitWsServer = async (wsUrl) => {
+    
+    for (let i = 0; i < 5; i++) {
+        
+        try {
+            await new Promise ((r, e) => {
+                const ws = new WebSocket(wsUrl)
+                ws.onopen = r
+                ws.onerror = e
+            })
+            break
+        } catch (error) {
+            await new Promise(r => setTimeout(r, 100))
         }
     }
 }
@@ -33,6 +52,12 @@ const logSpawn = (node) => {
 // node --test test/e2e.js
 test('e2e: create 2 contracts and reassign one of them', async () => {
     
+    // start da
+    const daOptions = { address: 'localhost', port: 9000 }
+    const da = spawn('node', ['da.js', '--port', daOptions.port])
+    const wsUrl = `ws://${daOptions.address}:${daOptions.port}`
+    await waitWsServer(wsUrl)
+
     // start node 1
     const nodeOptions = { address: 'localhost', port: 8001 }
     const node = spawn('node', ['index.js', '--port', nodeOptions.port])
@@ -92,6 +117,7 @@ test('e2e: create 2 contracts and reassign one of them', async () => {
     assert.strictEqual(Object.values(stateData5)[0], '0x04')
 
     // stop nodes
+    da.kill()
     node.kill()
     node2.kill()
 
