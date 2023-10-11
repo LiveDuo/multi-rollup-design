@@ -31,19 +31,21 @@ wss.on('connection', (ws) => {
 
 	// message
   ws.on('message', (message) => {
-		
-		console.log('Received', message.toString(), `(id=${ws.id})`)
 
 		// check
 		const tx = parseTransaction(message)
 		if (!tx) return ws.send('Invalid message')
+
+		console.log('Received', message.toString(), `(id=${ws.id})`)
 
 		// store
 		transactions.push(tx)
 
 		// broadcast
 		wss.clients.forEach((client) => {
-			if (client.id !== ws.id) ws.send(message)
+			if (client.id !== ws.id) {
+				client.send(message)
+			}
 		})
 
   })
