@@ -1,11 +1,6 @@
-const test = require('node:test')
-const assert = require('node:assert')
 const fetch = require('node-fetch')
-const { spawn } = require('node:child_process')
 
 const WebSocket = require('ws')
-
-const { OP_CODES } = require('../lib')
 
 const rpcRequest = async (url, method, params) => {
     const request = {jsonrpc: '2.0', method, id: 1, params}
