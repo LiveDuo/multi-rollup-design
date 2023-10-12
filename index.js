@@ -34,20 +34,20 @@ server.addMethod('echo', (message) => message)
 server.addMethod('ping', () => 'pong')
 
 server.addMethod('add_rollup', async () => {
-	return await submitTransaction({ type: 'hub', action: 'add_rollup' })
+	return await submitTransaction({ action: 'add_rollup' })
 })
 server.addMethod('remove_rollup', async (message) => {
-	return await submitTransaction({ type: 'hub', action: 'remove_rollup', params: [message[0]] })
+	return await submitTransaction({ action: 'remove_rollup', params: [message[0]] })
 })
 server.addMethod('create_contract', async (message) => {
-	const createResult = await submitTransaction({ type: 'hub', action: 'create_contract', params: [message[0]] })
+	const createResult = await submitTransaction({ action: 'create_contract', params: [message[0]] })
 	return { createdAddress: createResult.createdAddress.toString() }
 })
 server.addMethod('reassign_contract', async (message) => {
-	await submitTransaction({ type: 'hub', action: 'reassign_contract', params: [message[0], message[1]] })
+	await submitTransaction({ action: 'reassign_contract', params: [message[0], message[1]] })
 })
 server.addMethod('call_contract', async (message) => {
-	await submitTransaction({ type: 'rollup', action: 'call_contract', params: [message[0], message[1]] })
+	await submitTransaction({ action: 'call_contract', params: [message[0], message[1]] })
 })
 server.addMethod('query_state', async (message) => {
 	return await queryState(message[0])
