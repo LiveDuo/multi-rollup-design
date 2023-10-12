@@ -43,8 +43,8 @@ server.addMethod('create_contract', async ([code]) => {
 	const createResult = await submitTransaction({ action: 'create_contract', params: [rollupId, code] })
 	return { createdAddress: createResult.createdAddress.toString() }
 })
-server.addMethod('reassign_contract', async ([address, targetRollupId]) => {
-	await submitTransaction({ action: 'reassign_contract', params: [rollupId, address, targetRollupId] })
+server.addMethod('reassign_contract', async ([targetRollupId, address]) => {
+	await submitTransaction({ action: 'reassign_contract', params: [rollupId, targetRollupId, address] })
 })
 server.addMethod('call_contract', async ([targetRollupId, calldata]) => {
 	await submitTransaction({ action: 'call_contract', params: [rollupId, targetRollupId, calldata] })
