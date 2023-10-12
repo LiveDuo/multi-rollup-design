@@ -4,12 +4,15 @@ const bodyParser = require('body-parser')
 const { JSONRPCServer } = require('json-rpc-2.0')
 const WebSocket = require('ws')
 
+const { rpcRequest } = require('./test/utils')
+
 const argv = minimist(process.argv.slice(2))
 const rollupId = parseInt(argv.id) ?? 0
 const port = parseInt(argv.port) ?? 8000
-const daWsUrl = argv.da ?? 'ws://localhost:9000'
+const daWsUrl = argv.daWs ?? 'ws://localhost:9000'
+const daRpcUrl = argv.daRpc ?? 'http://localhost:9001'
 
-const { processTransaction, queryState: queryStateInner } = require('./lib')
+const { processTransaction, queryState: queryStateInner, setSynced, queryHub } = require('./lib')
 
 const ws = new WebSocket(daWsUrl)
 ws.on('open', () => {
@@ -45,6 +48,21 @@ server.addMethod('create_contract', async ([code]) => {
 })
 server.addMethod('reassign_contract', async ([targetRollupId, address]) => {
 	await submitTransaction({ action: 'reassign_contract', params: [rollupId, targetRollupId, address] })
+
+	const stateHub = queryHub()
+	const currentRollupId =  stateHub.contracts[address].rollupId
+
+	if (currentRollupId === targetRollupId) {
+		setSynced(false)
+
+		const txs = await rpcRequest(daRpcUrl, 'get_txs',[address])
+
+		for(let tx of txs) {
+			await processTransaction(tx)
+		}
+		
+		setSynced(true)
+	}
 })
 server.addMethod('call_contract', async ([targetRollupId, calldata]) => {
 	await submitTransaction({ action: 'call_contract', params: [rollupId, targetRollupId, calldata] })
