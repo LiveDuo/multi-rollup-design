@@ -61,7 +61,7 @@ server.listen(wsPort, () => {
 
 
 const RPCServer = new JSONRPCServer()
-RPCServer.addMethod('get_txs', (contractAddress) => {
+RPCServer.addMethod('get_txs', ([contractAddress]) => {
 	return transactions.filter(tx => tx.action === 'create_contract' || (tx.action === 'call_contract' && tx.params[1] === contractAddress))
 })
 

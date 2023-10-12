@@ -56,6 +56,7 @@ server.addMethod('reassign_contract', async ([targetRollupId, address]) => {
 		setSynced(false)
 
 		const txs = await rpcRequest(daRpcUrl, 'get_txs',[address])
+		// console.log("reassign_contract", JSON.stringify(txs))
 
 		for(let tx of txs) {
 			await processTransaction(tx)

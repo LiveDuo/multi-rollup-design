@@ -32,6 +32,8 @@ test('e2e: create 2 contracts and reassign one of them', async () => {
     const nodeUrl2 = `http://${nodeOptions2.address}:${nodeOptions2.port}`
     await waitRpcServer(nodeUrl2)
 
+    logSpawn(node2)
+
     // TODO remove this delay
     await new Promise((r) => setTimeout(r, 2000))
 
@@ -71,9 +73,8 @@ test('e2e: create 2 contracts and reassign one of them', async () => {
     // TODO
     // reassign contract 2
     await rpcRequest(nodeUrl2, 'reassign_contract', [0, createResult2.createdAddress.toString()])
-    const stateData4 = await rpcRequest(nodeUrl2, 'query_state', [createResult2.createdAddress.toString()])
-    console.log(Object.values(stateData4))
-    // await rpcRequest(nodeUrl, 'call_contract', [createResult2.createdAddress.toString()])
+    const stateData4 = await rpcRequest(nodeUrl, 'query_state', [createResult2.createdAddress.toString()])
+    console.log("stateData4",stateData4)
     // assert.deepStrictEqual(Object.values(stateData4)[0], '0x04')
 
     // // remove rollup
