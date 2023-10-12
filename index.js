@@ -5,7 +5,8 @@ const { JSONRPCServer } = require('json-rpc-2.0')
 const WebSocket = require('ws')
 
 const argv = minimist(process.argv.slice(2))
-const port = argv.port ?? 8000
+// const rollupId = parseInt(argv.id) ?? 0
+const port = parseInt(argv.port) ?? 8000
 const daWsUrl = argv.da ?? 'ws://localhost:9000'
 
 const { processTransaction, queryState: queryStateInner } = require('./lib')
