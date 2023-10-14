@@ -78,8 +78,8 @@ server.addMethod('reassign_contract', async ([targetRollupId, address]) => {
 		setSynced(true)
 	}
 })
-server.addMethod('call_contract', async ([targetRollupId, calldata]) => {
-	await submitTransaction({ action: 'call_contract', params: [rollupId, targetRollupId, calldata] })
+server.addMethod('call_contract', async ([address, calldata]) => {
+	await submitTransaction({ action: 'call_contract', params: [rollupId, address, calldata] })
 })
 server.addMethod('query_state', async ([address]) => {
 	return await queryState(address)

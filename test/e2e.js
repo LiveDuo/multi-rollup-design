@@ -53,17 +53,17 @@ test('e2e: create 2 contracts and reassign one of them', async () => {
     assert.deepStrictEqual(createResult2.createdAddress.substring(2).length, 40)
     
     // call contract 1
-    await rpcRequest(nodeUrl2, 'call_contract', [createResult.createdAddress.toString()])
+    await rpcRequest(nodeUrl2, 'call_contract', [createResult.createdAddress.toString(), []])
     const stateData = await rpcRequest(nodeUrl2, 'query_state', [createResult.createdAddress.toString()])
     assert.deepStrictEqual(Object.values(stateData ?? [])[0], '0x02')
 
     // call contract 1
-    await rpcRequest(nodeUrl2, 'call_contract', [createResult.createdAddress.toString()])
+    await rpcRequest(nodeUrl2, 'call_contract', [createResult.createdAddress.toString(), []])
     const stateData2 = await rpcRequest(nodeUrl2, 'query_state', [createResult.createdAddress.toString()])
     assert.deepStrictEqual(Object.values(stateData2 ?? [])[0], '0x02')
     
     // call contract 2
-    await rpcRequest(nodeUrl2, 'call_contract', [createResult2.createdAddress.toString()])
+    await rpcRequest(nodeUrl2, 'call_contract', [createResult2.createdAddress.toString(), []])
     const stateData3 = await rpcRequest(nodeUrl2, 'query_state', [createResult2.createdAddress.toString()])
     assert.deepStrictEqual(Object.values(stateData3 ?? [])[0], '0x04')
 
