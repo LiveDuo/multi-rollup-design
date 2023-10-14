@@ -32,8 +32,6 @@ const queryState = (address) => queryStateInner(address)
 
 // https://www.npmjs.com/package/json-rpc-2.0
 const server = new JSONRPCServer()
-server.addMethod('log', (message) => console.log(message))
-server.addMethod('echo', (message) => message)
 server.addMethod('ping', () => 'pong')
 
 server.addMethod('add_rollup', async () => {
@@ -66,7 +64,7 @@ server.addMethod('reassign_contract', async ([targetRollupId, address]) => {
 	if (currentRollupId === targetRollupId) {
 		setSynced(false)
 
-		const txs = await rpcRequest(daRpcUrl, 'get_txs', [address])
+		const txs = await rpcRequest(daRpcUrl, 'get_contract_txs', [address])
 		// console.log("reassign_contract", JSON.stringify(txs))
 
 		for(let tx of txs) {
