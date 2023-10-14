@@ -1,8 +1,6 @@
 {
   "dependencies": {
-    "@ethereumjs/blockchain": "^7.0.0",
     "@ethereumjs/evm": "^2.0.0",
-    "@ethereumjs/trie": "^6.0.0",
     "@ethereumjs/tx": "^5.0.0",
     "@ethereumjs/util": "^9.0.0",
     "@ethereumjs/vm": "^7.0.0",
