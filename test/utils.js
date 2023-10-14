@@ -22,6 +22,7 @@ const waitRpcServer = async (nodeUrl) => {
             if (res === 'pong') { break } else { throw new Error('Server unavailable') }
         } catch (error) {
             await new Promise(r => setTimeout(r, RETRY_DELAY))
+            if (i===MAX_RETRIES-1) throw new Error('Server timeout')
         }
     }
 }
@@ -40,6 +41,7 @@ const waitWsServer = async (wsUrl) => {
             break
         } catch (error) {
             await new Promise(r => setTimeout(r, RETRY_DELAY))
+            if (i===MAX_RETRIES-1) throw new Error('Server timeout')
         }
     }
 }
