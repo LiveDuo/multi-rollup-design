@@ -15,6 +15,7 @@ const senderWallet2 = Wallet.generate()
 const vm1 = new VM()
 const vm2 = new VM()
 
+// node scripts/examples/reassign-contract.js
 ; (async () => {
 	
 	// deploy contract 1

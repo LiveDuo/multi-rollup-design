@@ -9,7 +9,7 @@ const vm = new VM()
 
 const senderWallet = Wallet.generate()
 
-// node scripts/run-tx.js
+// node scripts/examples/run-tx.js
 ;(async () => {
 
   // run tx

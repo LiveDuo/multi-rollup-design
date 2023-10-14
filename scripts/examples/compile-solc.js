@@ -21,7 +21,7 @@ const input = {
   settings: { outputSelection: { '*': { '*': ['*'] } } }
 }
 
-// node scripts/run-solc.js
+// node scripts/examples/compile-solc.js
 ; (async () => {
   
   // compile contract
