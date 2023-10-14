@@ -16,7 +16,7 @@ test('e2e: create 2 contracts and reassign one of them', async () => {
     await waitWsServer(wsUrl)
     await waitRpcServer(rpcUrl)
 
-    logSpawn(da)
+    // logSpawn(da, 'da')
 
     // start node 1
     const nodeOptions = { address: 'localhost', port: 8001 }
