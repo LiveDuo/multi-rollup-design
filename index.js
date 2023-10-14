@@ -40,16 +40,19 @@ server.addMethod('add_rollup', async () => {
 server.addMethod('remove_rollup', async ([targetRollupId]) => {
 	await submitTransaction({ action: 'remove_rollup', params: [rollupId, targetRollupId] })
 
-	// reassign contracts
+	// prepare rollup map
 	const stateHub = queryHub()
-	const txs = await rpcRequest(daRpcUrl, 'get_txs', [])
-	// console.log("remove_rollup", JSON.stringify(txs))
+	const rollupContracts = Object.entries(stateHub.contracts).filter(([_, data]) => data.rollupId === targetRollupId).map(([contract, _]) => contract)
 
-	// TODO fix
-	for (const [i, tx] of txs.entries()) {
+	// reassign contracts
+	const txs = await rpcRequest(daRpcUrl, 'get_txs', [])
+	for (const [i, address] of rollupContracts.entries()) {
 		const currentRollupId = i % stateHub.count
 		if (currentRollupId === rollupId) {
-			await processTransaction(tx)
+			const txsRollup = txs.filter(tx => (tx.action === 'create_contract' && stateHub.contracts[address].rollupId === targetRollupId) || (tx.action === 'call_contract' && tx.params[1] === address))
+			for (let tx of txsRollup) {
+				await processTransaction(tx)
+			}
 		}
 	}
 })
@@ -67,11 +70,9 @@ server.addMethod('reassign_contract', async ([targetRollupId, address]) => {
 		setSynced(false)
 
 		const txs = await rpcRequest(daRpcUrl, 'get_txs', [])
-		// console.log("reassign_contract", JSON.stringify(txs))
 
-		// TODO filter `create_contract`
-		const txsAddress = txs.filter(tx => (tx.action === 'create_contract') || (tx.action === 'call_contract' && tx.params[1] === address))
-		for(let tx of txsAddress) {
+		const txsAddress = txs.filter(tx => (tx.action === 'create_contract' && stateHub.contracts[address].rollupId === targetRollupId) || (tx.action === 'call_contract' && tx.params[1] === address))
+		for (let tx of txsAddress) {
 			await processTransaction(tx)
 		}
 		
