@@ -44,6 +44,8 @@ server.addMethod('remove_rollup', async ([targetRollupId]) => {
 	const stateHub = queryHub()
 	const txs = await rpcRequest(daRpcUrl, 'get_txs', [])
 	// console.log("remove_rollup", JSON.stringify(txs))
+
+	// TODO fix
 	for (const [i, tx] of txs.entries()) {
 		const currentRollupId = i % stateHub.count
 		if (currentRollupId === rollupId) {
