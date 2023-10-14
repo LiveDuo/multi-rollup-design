@@ -47,8 +47,8 @@ const waitWsServer = async (wsUrl) => {
 }
 exports.waitWsServer = waitWsServer
 
-const logSpawn = (node) => {
-    node.stderr.on('data', (d) => console.log('stderr:', d.toString()))
-    node.stdout.on('data', (d) => console.log('stdout:', d.toString()))
+const logSpawn = (node, name) => {
+    node.stderr.on('data', (d) => console.log(name, 'stderr:', d.toString()))
+    node.stdout.on('data', (d) => console.log(name, 'stdout:', d.toString()))
 }
 exports.logSpawn = logSpawn

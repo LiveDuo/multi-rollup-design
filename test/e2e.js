@@ -24,7 +24,7 @@ test('e2e: create 2 contracts and reassign one of them', async () => {
     const nodeUrl = `http://${nodeOptions.address}:${nodeOptions.port}`
     await waitRpcServer(nodeUrl)
     
-    logSpawn(node)
+    logSpawn(node, 'node-0')
 
     // start node 2
     const nodeOptions2 = { address: 'localhost', port: 8002 }
@@ -32,7 +32,7 @@ test('e2e: create 2 contracts and reassign one of them', async () => {
     const nodeUrl2 = `http://${nodeOptions2.address}:${nodeOptions2.port}`
     await waitRpcServer(nodeUrl2)
 
-    logSpawn(node2)
+    logSpawn(node2, 'node-1')
 
     // create rollup 1
     const addResult = await rpcRequest(nodeUrl, 'add_rollup', [])
