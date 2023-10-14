@@ -5,7 +5,7 @@ const { JSONRPCServer } = require('json-rpc-2.0')
 const WebSocket = require('ws')
 const { Wallet } = require('@ethereumjs/wallet')
 
-const { processTransaction, queryState, queryHub, setSynced } = require('./lib')
+const { processTransaction, queryState, queryHub, setSynced, setRollupId } = require('./lib')
 
 const { rpcRequest } = require('./test/utils')
 
@@ -16,6 +16,8 @@ const daWsUrl = argv.daWs ?? 'ws://localhost:9000'
 const daRpcUrl = argv.daRpc ?? 'http://localhost:9001'
 
 const senderWallet = Wallet.generate()
+
+setRollupId(rollupId)
 
 console.log('init', `rollupId=${rollupId}`)
 
@@ -40,10 +42,10 @@ const server = new JSONRPCServer()
 server.addMethod('ping', () => 'pong')
 
 server.addMethod('add_rollup', async () => {
-	return await submitTransaction({ action: 'add_rollup', params: [rollupId] })
+	return await submitTransaction({ action: 'add_rollup', params: [] })
 })
 server.addMethod('remove_rollup', async ([targetRollupId]) => {
-	await submitTransaction({ action: 'remove_rollup', params: [rollupId, targetRollupId] })
+	await submitTransaction({ action: 'remove_rollup', params: [targetRollupId] })
 
 	// get rollup contracts
 	const stateHub = queryHub()
@@ -62,11 +64,11 @@ server.addMethod('remove_rollup', async ([targetRollupId]) => {
 	}
 })
 server.addMethod('create_contract', async ([code]) => {
-	const createResult = await submitTransaction({ action: 'create_contract', params: [rollupId, code] })
+	const createResult = await submitTransaction({ action: 'create_contract', params: [code] })
 	return { createdAddress: createResult.createdAddress.toString() }
 })
 server.addMethod('reassign_contract', async ([targetRollupId, address]) => {
-	await submitTransaction({ action: 'reassign_contract', params: [rollupId, targetRollupId, address] })
+	await submitTransaction({ action: 'reassign_contract', params: [targetRollupId, address] })
 
 	const stateHub = queryHub()
 	const contractRollupId =  stateHub.contracts[address].rollupId
@@ -85,7 +87,7 @@ server.addMethod('reassign_contract', async ([targetRollupId, address]) => {
 	}
 })
 server.addMethod('call_contract', async ([address, calldata]) => {
-	await submitTransaction({ action: 'call_contract', params: [rollupId, address, calldata] })
+	await submitTransaction({ action: 'call_contract', params: [address, calldata] })
 })
 server.addMethod('query_state', async ([address]) => {
 	return await queryState(address)
