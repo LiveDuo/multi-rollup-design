@@ -2,6 +2,9 @@ const fetch = require('node-fetch')
 
 const WebSocket = require('ws')
 
+const MAX_RETRIES = 5
+const RETRY_DELAY = 200 // ms
+
 const rpcRequest = async (url, method, params) => {
     const request = {jsonrpc: '2.0', method, id: 1, params}
     const requestParams = { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(request) }
@@ -13,12 +16,12 @@ exports.rpcRequest = rpcRequest
 
 const waitRpcServer = async (nodeUrl) => {
     
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < MAX_RETRIES; i++) {
         try {
             const res = await rpcRequest(nodeUrl, 'ping', [])
             if (res === 'pong') { break } else { throw new Error('Server unavailable') }
         } catch (error) {
-            await new Promise(r => setTimeout(r, 100))
+            await new Promise(r => setTimeout(r, RETRY_DELAY))
         }
     }
 }
@@ -26,7 +29,7 @@ exports.waitRpcServer = waitRpcServer
 
 const waitWsServer = async (wsUrl) => {
     
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < MAX_RETRIES; i++) {
         
         try {
             await new Promise ((r, e) => {
@@ -36,7 +39,7 @@ const waitWsServer = async (wsUrl) => {
             })
             break
         } catch (error) {
-            await new Promise(r => setTimeout(r, 100))
+            await new Promise(r => setTimeout(r, RETRY_DELAY))
         }
     }
 }
