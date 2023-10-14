@@ -34,9 +34,6 @@ test('e2e: create 2 contracts and reassign one of them', async () => {
 
     logSpawn(node2)
 
-    // TODO remove this delay
-    await new Promise((r) => setTimeout(r, 2000))
-
     // create rollup 1
     const addResult = await rpcRequest(nodeUrl, 'add_rollup', [])
     assert.strictEqual(addResult.rollupId, 0)
