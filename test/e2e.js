@@ -77,8 +77,7 @@ test('e2e: create 2 contracts and reassign one of them', async () => {
     // remove rollup
     await rpcRequest(nodeUrl, 'remove_rollup', [1])
     const stateData5 = await rpcRequest(nodeUrl, 'query_state', [createResult2.createdAddress.toString()])
-    console.log('stateData5', stateData5) // TODO fix
-    // assert.strictEqual(Object.values(stateData5)[0], '0x04')
+    assert.strictEqual(Object.values(stateData5)[0], '0x04')
 
     // stop nodes
     da.kill()
