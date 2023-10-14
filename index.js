@@ -12,7 +12,7 @@ const port = parseInt(argv.port) ?? 8000
 const daWsUrl = argv.daWs ?? 'ws://localhost:9000'
 const daRpcUrl = argv.daRpc ?? 'http://localhost:9001'
 
-const { processTransaction, queryState: queryStateInner, setSynced, queryHub } = require('./lib')
+const { processTransaction, queryState, queryHub, setSynced } = require('./lib')
 
 const ws = new WebSocket(daWsUrl)
 ws.on('open', () => {
@@ -28,7 +28,6 @@ const submitTransaction = async (tx) => {
 	const result = await processTransaction(tx)
 	return result
 }
-const queryState = (address) => queryStateInner(address)
 
 // https://www.npmjs.com/package/json-rpc-2.0
 const server = new JSONRPCServer()
@@ -56,8 +55,8 @@ server.addMethod('remove_rollup', async ([targetRollupId]) => {
 		}
 	}
 })
-server.addMethod('create_contract', async ([code, nonce]) => {
-	const createResult = await submitTransaction({ action: 'create_contract', params: [rollupId, code, nonce] })
+server.addMethod('create_contract', async ([code]) => {
+	const createResult = await submitTransaction({ action: 'create_contract', params: [rollupId, code] })
 	return { createdAddress: createResult.createdAddress.toString() }
 })
 server.addMethod('reassign_contract', async ([targetRollupId, address]) => {

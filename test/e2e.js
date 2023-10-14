@@ -44,12 +44,12 @@ test('e2e: create 2 contracts and reassign one of them', async () => {
 
 	// create contract 1
     const code = [OP_CODES.PUSH1, '02', OP_CODES.PUSH1, '03', OP_CODES.SSTORE]
-    const createResult = await rpcRequest(nodeUrl2, 'create_contract', ['0x' + code.join(''), 0])
+    const createResult = await rpcRequest(nodeUrl2, 'create_contract', ['0x' + code.join('')])
     assert.deepStrictEqual(createResult.createdAddress.substring(2).length, 40)
 
     // create contract 2
     const code2 = [OP_CODES.PUSH1, '04', OP_CODES.PUSH1, '05', OP_CODES.SSTORE]
-    const createResult2 = await rpcRequest(nodeUrl2, 'create_contract', ['0x' + code2.join(''), 1])
+    const createResult2 = await rpcRequest(nodeUrl2, 'create_contract', ['0x' + code2.join('')])
     assert.deepStrictEqual(createResult2.createdAddress.substring(2).length, 40)
     
     // call contract 1

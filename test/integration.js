@@ -1,13 +1,11 @@
 const test = require('node:test')
 const assert = require('node:assert')
 
-const { OP_CODES, processTransaction, queryState: queryStateInner, queryHub: queryHubInner, debug } = require('../lib')
+const { OP_CODES, processTransaction, queryState, queryHub, debug } = require('../lib')
 
 const submitTransaction = async (tx) => {
     return await processTransaction(tx)
 }
-const queryHub = (rollupId) => queryHubInner(rollupId)
-const queryState = (address) => queryStateInner(address)
 
 // node --test test/integration.js
 test('integration: create 2 contracts and reassign one of them', async () => {
