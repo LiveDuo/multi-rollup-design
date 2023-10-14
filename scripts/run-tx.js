@@ -7,10 +7,9 @@ const code = [OP_CODES.PUSH1, '02', OP_CODES.PUSH1, '03', OP_CODES.SSTORE]
 
 const vm = new VM()
 
-// prepare sender
 const senderWallet = Wallet.generate()
 
-// https://github.com/ethereumjs/ethereumjs-monorepo/blob/master/packages/util/test/account.spec.ts#L500
+// node scripts/run-tx.js
 ;(async () => {
 
   // run tx

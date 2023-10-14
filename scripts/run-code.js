@@ -6,7 +6,7 @@ const code = [OP_CODES.PUSH1, '02', OP_CODES.PUSH1, '03', OP_CODES.SSTORE]
 
 const evm = new EVM()
 
-// https://www.npmjs.com/package/@ethereumjs/evm
+// node scripts/run-code.js
 ;(async () => {
 
     console.log('---- Code ----')
