@@ -2,7 +2,7 @@ const fetch = require('node-fetch')
 
 const WebSocket = require('ws')
 
-const MAX_RETRIES = 5
+const MAX_RETRIES = 10
 const RETRY_DELAY = 200 // ms
 
 const rpcRequest = async (url, method, params) => {
