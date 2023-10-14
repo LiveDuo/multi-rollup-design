@@ -3,6 +3,9 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const { JSONRPCServer } = require('json-rpc-2.0')
 const WebSocket = require('ws')
+const { Wallet } = require('@ethereumjs/wallet')
+
+const { processTransaction, queryState, queryHub, setSynced } = require('./lib')
 
 const { rpcRequest } = require('./test/utils')
 
@@ -12,11 +15,13 @@ const port = parseInt(argv.port) ?? 8000
 const daWsUrl = argv.daWs ?? 'ws://localhost:9000'
 const daRpcUrl = argv.daRpc ?? 'http://localhost:9001'
 
-const { processTransaction, queryState, queryHub, setSynced } = require('./lib')
+const senderWallet = Wallet.generate()
+
+console.log('init', `rollupId=${rollupId}`)
 
 const ws = new WebSocket(daWsUrl)
 ws.on('open', () => {
-	console.log('Da websocket connected')
+	console.log('da websocket connected')
 })
 ws.on('message', async (message) => {
 	const tx = JSON.parse(message.toString())
@@ -24,6 +29,7 @@ ws.on('message', async (message) => {
 })
 
 const submitTransaction = async (tx) => {
+	tx.key = senderWallet.getPrivateKeyString()
 	ws.send(JSON.stringify(tx))
 	const result = await processTransaction(tx)
 	return result

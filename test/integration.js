@@ -1,9 +1,14 @@
 const test = require('node:test')
 const assert = require('node:assert')
 
+const { Wallet } = require('@ethereumjs/wallet')
+
 const { OP_CODES, processTransaction, queryState, queryHub, debug } = require('../lib')
 
+const senderWallet = Wallet.generate()
+
 const submitTransaction = async (tx) => {
+    tx.key = senderWallet.getPrivateKeyString()
     return await processTransaction(tx)
 }
 
