@@ -47,12 +47,12 @@ test('e2e: create 2 contracts and reassign one of them', async () => {
 
 	// create contract 1
     const code = [OP_CODES.PUSH1, '02', OP_CODES.PUSH1, '03', OP_CODES.SSTORE]
-    const createResult = await rpcRequest(nodeUrl2, 'create_contract', ['0x' + code.join('')])
+    const createResult = await rpcRequest(nodeUrl2, 'create_contract', ['0x' + code.join(''), 0])
     assert.deepStrictEqual(createResult.createdAddress.substring(2).length, 40)
 
     // create contract 2
     const code2 = [OP_CODES.PUSH1, '04', OP_CODES.PUSH1, '05', OP_CODES.SSTORE]
-    const createResult2 = await rpcRequest(nodeUrl2, 'create_contract', ['0x' + code2.join('')])
+    const createResult2 = await rpcRequest(nodeUrl2, 'create_contract', ['0x' + code2.join(''), 1])
     assert.deepStrictEqual(createResult2.createdAddress.substring(2).length, 40)
     
     // call contract 1
@@ -74,7 +74,7 @@ test('e2e: create 2 contracts and reassign one of them', async () => {
     // reassign contract 2
     await rpcRequest(nodeUrl2, 'reassign_contract', [0, createResult2.createdAddress.toString()])
     const stateData4 = await rpcRequest(nodeUrl, 'query_state', [createResult2.createdAddress.toString()])
-    console.log("stateData4",stateData4)
+    console.log("stateData4", stateData4)
     // assert.deepStrictEqual(Object.values(stateData4)[0], '0x04')
 
     // // remove rollup

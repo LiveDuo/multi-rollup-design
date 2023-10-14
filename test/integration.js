@@ -29,11 +29,11 @@ test('integration: create 2 contracts and reassign one of them', async () => {
 
     // create contract 1
 	const code = [OP_CODES.PUSH1, '02', OP_CODES.PUSH1, '03', OP_CODES.SSTORE]
-	const createResult = await submitTransaction({ type: 'hub', action: 'create_contract', params: [rollupId2, '0x' + code.join('')] })
+	const createResult = await submitTransaction({ type: 'hub', action: 'create_contract', params: [rollupId2, '0x' + code.join(''), 0]})
     
     // create contract 2
 	const code2 = [OP_CODES.PUSH1, '04', OP_CODES.PUSH1, '05', OP_CODES.SSTORE]
-	const createResult2 = await submitTransaction({ type: 'hub', action: 'create_contract', params: [rollupId2, '0x' + code2.join('')] })
+	const createResult2 = await submitTransaction({ type: 'hub', action: 'create_contract', params: [rollupId2, '0x' + code2.join(''), 1]})
 
 	// call contract 1
 	await submitTransaction({ type: 'rollup', action: 'call_contract', params: [rollupId2, createResult.createdAddress.toString(), []] })

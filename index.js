@@ -53,8 +53,8 @@ server.addMethod('remove_rollup', async ([targetRollupId]) => {
 		}
 	}
 })
-server.addMethod('create_contract', async ([code]) => {
-	const createResult = await submitTransaction({ action: 'create_contract', params: [rollupId, code] })
+server.addMethod('create_contract', async ([code, nonce]) => {
+	const createResult = await submitTransaction({ action: 'create_contract', params: [rollupId, code, nonce] })
 	return { createdAddress: createResult.createdAddress.toString() }
 })
 server.addMethod('reassign_contract', async ([targetRollupId, address]) => {
