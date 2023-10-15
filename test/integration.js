@@ -5,10 +5,12 @@ const { Wallet } = require('@ethereumjs/wallet')
 
 const { OP_CODES, processTransaction, queryState, queryHub, setRollupId, debug } = require('../lib')
 
+const { getSignature } = require('../test/utils')
+
 const senderWallet = Wallet.generate()
 
 const submitTransaction = async (tx) => {
-    tx.key = senderWallet.getPrivateKeyString()
+    tx.signature = getSignature(tx, senderWallet)
     return await processTransaction(tx)
 }
 

@@ -7,7 +7,7 @@ const { Wallet } = require('@ethereumjs/wallet')
 
 const { processTransaction, queryState, queryHub, setSynced, setRollupId } = require('./lib')
 
-const { rpcRequest } = require('./test/utils')
+const { rpcRequest, getSignature } = require('./test/utils')
 
 const argv = minimist(process.argv.slice(2))
 const rollupId = parseInt(argv.id) ?? 0
@@ -31,7 +31,7 @@ ws.on('message', async (message) => {
 })
 
 const submitTransaction = async (tx) => {
-	tx.key = senderWallet.getPrivateKeyString()
+	tx.signature = getSignature(tx, senderWallet)
 	ws.send(JSON.stringify(tx))
 	const result = await processTransaction(tx)
 	return result

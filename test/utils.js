@@ -1,3 +1,7 @@
+const { keccak256 } = require('ethereum-cryptography/keccak')
+const { ecsign, bigIntToBytes } = require('@ethereumjs/util')
+const { RLP } = require('@ethereumjs/rlp')
+
 const fetch = require('node-fetch')
 
 const WebSocket = require('ws')
@@ -52,3 +56,17 @@ const logSpawn = (node, name) => {
     node.stdout.on('data', (d) => console.log(name, 'stdout:', d.toString()))
 }
 exports.logSpawn = logSpawn
+
+const getMessageHash = (tx) => {
+    const message = [tx.to !== undefined ? tx.to.bytes : new Uint8Array(0), tx.data]
+    return keccak256(RLP.encode(message))
+}
+exports.getMessageHash = getMessageHash
+
+const getSignature = (tx, senderWallet) => {
+    const messageHash = getMessageHash(tx)
+    const ecSignature = ecsign(messageHash, senderWallet.getPrivateKey(), 1n)
+    const signature = new Uint8Array([ ...bigIntToBytes(ecSignature.v), ...ecSignature.r, ...ecSignature.s ])
+    return '0x' + Buffer.from(signature).toString('hex')
+}
+exports.getSignature = getSignature
