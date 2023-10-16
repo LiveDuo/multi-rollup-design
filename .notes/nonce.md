@@ -4,6 +4,7 @@
 1. Set mapped nonces
     - **Explanation:** Map nonces in `create_contract` and `call_contract` such that `rollupNonce = f(rollupId, senderNonce)`
     - **Example mapping:** `rollupNonce = rollupId * 1000 + senderNonce`
+    - **Issue:** Nonce might change from `call_contract` transactions
 
 2. Set initial nonces
     - **Explanation:** Set the nonce of the initial transaction
