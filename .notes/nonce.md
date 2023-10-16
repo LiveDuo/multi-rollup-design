@@ -8,7 +8,7 @@
 2. Set initial nonces
     - **Explanation:** Set the nonce of the initial transaction
     - **Issue:** There could be address collisions with migrated and existing contracts
-    - **Issue example:** (Sender, 1) on rollup 1 and (Sender, 2) on rollup 2
+    - **Issue example:** (sender, 0) on rollup 1 and (sender, 0) on rollup 2
 
 
 ### Code notes
