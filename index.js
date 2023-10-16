@@ -56,6 +56,8 @@ server.addMethod('remove_rollup', async ([targetRollupId]) => {
 	for (const [i, [address, data]] of rollupContracts.entries()) {
 		const contractRollupId = i % stateHub.count
 		if (contractRollupId === rollupId) {
+			// NOTE this returns all contracts
+			// TODO should recalculate address ie. Address.generate(recoverSignature(sig), salt) and filter
 			const txsRollup = txs.filter(tx => (tx.action === 'create_contract' && data.rollupId === targetRollupId) || (tx.action === 'call_contract' && tx.params[1] === address))
 			for (let tx of txsRollup) {
 				await processTransaction(tx)
@@ -78,6 +80,7 @@ server.addMethod('reassign_contract', async ([targetRollupId, address]) => {
 		
 		const txs = await rpcRequest(daRpcUrl, 'get_txs', [])
 		
+		// TODO same as above
 		const txsAddress = txs.filter(tx => (tx.action === 'create_contract' && stateHub.contracts[address].rollupId === targetRollupId) || (tx.action === 'call_contract' && tx.params[1] === address))
 		for (let tx of txsAddress) {
 			await processTransaction(tx)
