@@ -35,47 +35,53 @@ test('e2e: create 2 contracts and reassign one of them', async () => {
     logSpawn(node2, 'node-1')
 
     // create rollup 1
-    const addResult = await rpcRequest(nodeUrl, 'add_rollup', [])
+    const addResult = await rpcRequest(nodeUrl, 'submit_tx', [{action: 'add_rollup'}])
     assert.strictEqual(addResult.rollupId, 0)
     
     // create rollup 2
-    const addResult2 = await rpcRequest(nodeUrl, 'add_rollup', [])
+    const addResult2 = await rpcRequest(nodeUrl, 'submit_tx', [{action: 'add_rollup'}])
     assert.strictEqual(addResult2.rollupId, 1)
 
 	// create contract 1
     const code = [OP_CODES.PUSH1, '02', OP_CODES.PUSH1, '03', OP_CODES.SSTORE]
-    const createResult = await rpcRequest(nodeUrl2, 'create_contract', ['0x' + code.join(''), 0])
+    const createResult = await rpcRequest(nodeUrl2, 'submit_tx', [{action: 'create_contract', params: ['0x' + code.join(''), 0]}])
     assert.deepStrictEqual(createResult.createdAddress.substring(2).length, 40)
 
     // create contract 2
     const code2 = [OP_CODES.PUSH1, '04', OP_CODES.PUSH1, '05', OP_CODES.SSTORE]
-    const createResult2 = await rpcRequest(nodeUrl2, 'create_contract', ['0x' + code2.join(''), 1])
+    const createResult2 = await rpcRequest(nodeUrl2, 'submit_tx', [{action: 'create_contract', params: ['0x' + code2.join(''), 1]}])
     assert.deepStrictEqual(createResult2.createdAddress.substring(2).length, 40)
     
     // call contract 1
-    await rpcRequest(nodeUrl2, 'call_contract', [createResult.createdAddress.toString(), []])
+    await rpcRequest(nodeUrl2, 'submit_tx', [{action: 'call_contract', params: [createResult.createdAddress.toString(), []]}])
     const stateData = await rpcRequest(nodeUrl2, 'query_state', [createResult.createdAddress.toString()])
     assert.deepStrictEqual(Object.values(stateData ?? [])[0], '0x02')
 
     // call contract 1
-    await rpcRequest(nodeUrl2, 'call_contract', [createResult.createdAddress.toString(), []])
+    await rpcRequest(nodeUrl2, 'submit_tx', [{action: 'call_contract', params: [createResult.createdAddress.toString(), []]}])
     const stateData2 = await rpcRequest(nodeUrl2, 'query_state', [createResult.createdAddress.toString()])
     assert.deepStrictEqual(Object.values(stateData2 ?? [])[0], '0x02')
     
     // call contract 2
-    await rpcRequest(nodeUrl2, 'call_contract', [createResult2.createdAddress.toString(), []])
+    await rpcRequest(nodeUrl2, 'submit_tx', [{action: 'call_contract', params: [createResult2.createdAddress.toString(), []]}])
     const stateData3 = await rpcRequest(nodeUrl2, 'query_state', [createResult2.createdAddress.toString()])
     assert.deepStrictEqual(Object.values(stateData3 ?? [])[0], '0x04')
 
     // reassign contract 2
-    await rpcRequest(nodeUrl2, 'reassign_contract', [0, createResult2.createdAddress.toString()])
+    await rpcRequest(nodeUrl2, 'submit_tx', [{action: 'reassign_contract', params: [0, createResult2.createdAddress.toString()]}])
+    
+    // check state after waiting
+    await new Promise((r) => setTimeout(r, 1000))
     const stateData4 = await rpcRequest(nodeUrl, 'query_state', [createResult2.createdAddress.toString()])
     console.log('stateData4', stateData4) // TODO fix
     // assert.deepStrictEqual(Object.values(stateData4)[0], '0x04')
 
 
     // remove rollup
-    await rpcRequest(nodeUrl, 'remove_rollup', [1])
+    await rpcRequest(nodeUrl2, 'submit_tx', [{action: 'remove_rollup', params: [1]}])
+
+    // check state after waiting
+    await new Promise((r) => setTimeout(r, 1000))
     const stateData5 = await rpcRequest(nodeUrl, 'query_state', [createResult2.createdAddress.toString()])
     assert.strictEqual(Object.values(stateData5)[0], '0x04')
 

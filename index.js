@@ -80,6 +80,8 @@ ws.on('message', async (message) => {
 })
 
 const submitTransaction = async (tx) => {
+	// NOTE this overrides the tx signature and hence the tx sender
+	// TODO fix by moving signing to e2e test
 	tx.signature = getSignature(tx, senderWallet)
 	ws.send(JSON.stringify(tx))
 	const result = await processTransaction(tx)
@@ -90,25 +92,8 @@ const submitTransaction = async (tx) => {
 const server = new JSONRPCServer()
 server.addMethod('ping', () => 'pong')
 
-server.addMethod('add_rollup', async () => {
-	return await submitTransaction({ action: 'add_rollup', params: [] })
-})
-server.addMethod('remove_rollup', async ([targetRollupId]) => {
-	await submitTransaction({ action: 'remove_rollup', params: [targetRollupId] })
-
-	await processTransactionAsync({ action: 'remove_rollup', params: [targetRollupId] })
-})
-server.addMethod('create_contract', async ([code, salt]) => {
-	const createResult = await submitTransaction({ action: 'create_contract', params: [code, salt] })
-	return { createdAddress: createResult.createdAddress.toString() }
-})
-server.addMethod('reassign_contract', async ([targetRollupId, address]) => {
-	await submitTransaction({ action: 'reassign_contract', params: [targetRollupId, address] })
-	
-	await processTransactionAsync({ action: 'reassign_contract', params: [targetRollupId, address] })
-})
-server.addMethod('call_contract', async ([address, calldata]) => {
-	await submitTransaction({ action: 'call_contract', params: [address, calldata] })
+server.addMethod('submit_tx', async ([tx]) => {
+	return await submitTransaction(tx)
 })
 server.addMethod('query_state', async ([address]) => {
 	return await queryState(address)
