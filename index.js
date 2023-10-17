@@ -53,17 +53,20 @@ const processTransactionAsync = async (_tx) => {
 		
 		// reassign contracts
 		const txs = await rpcRequest(daRpcUrl, 'get_txs', [])
-		for (const [i, [address, data]] of rollupContracts.entries()) {
+		for (const [i, [address, _]] of rollupContracts.entries()) {
+			
+			// check rollup id
 			const contractRollupId = i % stateHub.count
-			if (contractRollupId === rollupId) {
-				
-				const txsRollup = txs.filter(tx => isCreateContractRollup(tx, data.rollupId, targetRollupId) || (isCallContract(tx, address)))
-				for (let tx of txsRollup) {
-					tx.reassign = { rollupId: contractRollupId }
-					await processTransaction(tx)
-				}
+			if (contractRollupId !== rollupId) continue
+
+			// process contract
+			const txsRollup = txs.filter(tx => isCreateContractAddress(tx, address) || isCallContract(tx, address))
+			for (let tx of txsRollup) {
+				tx.reassign = { rollupId: contractRollupId }
+				await processTransaction(tx)
 			}
 		}
+		
 	}
 }
 
