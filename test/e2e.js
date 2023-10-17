@@ -80,17 +80,16 @@ test('e2e: create 2 contracts and reassign one of them', async () => {
     await rpcRequest(nodeUrl2, 'submit_tx', [signTx({action: 'reassign_contract', params: [createResult2.createdAddress.toString(), 0]})])
     
     // check state after waiting
-    await new Promise((r) => setTimeout(r, 1000))
+    await new Promise((r) => setTimeout(r, 500))
     const stateData4 = await rpcRequest(nodeUrl, 'query_state', [createResult2.createdAddress.toString()])
-    console.log('stateData4', stateData4) // TODO fix
-    // assert.deepStrictEqual(Object.values(stateData4)[0], '0x04')
+    assert.deepStrictEqual(Object.values(stateData4)[0], '0x04')
 
 
     // remove rollup
     await rpcRequest(nodeUrl2, 'submit_tx', [signTx({action: 'remove_rollup', params: [1]})])
 
     // check state after waiting
-    await new Promise((r) => setTimeout(r, 1000))
+    await new Promise((r) => setTimeout(r, 500))
     const stateData5 = await rpcRequest(nodeUrl, 'query_state', [createResult2.createdAddress.toString()])
     assert.strictEqual(Object.values(stateData5)[0], '0x04')
 

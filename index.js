@@ -37,6 +37,7 @@ const processTransactionAsync = async (_tx) => {
 			const txs = await rpcRequest(daRpcUrl, 'get_txs', [])
 			const txsAddress = txs.filter(tx => isCreateContractAddress(tx, address) || isCallContract(tx, address))
 			for (let tx of txsAddress) {
+				tx.reassign = { rollupId: targetRollupId }
 				await processTransaction(tx)
 			}
 			
@@ -58,6 +59,7 @@ const processTransactionAsync = async (_tx) => {
 				
 				const txsRollup = txs.filter(tx => isCreateContractRollup(tx, data.rollupId, targetRollupId) || (isCallContract(tx, address)))
 				for (let tx of txsRollup) {
+					tx.reassign = { rollupId: contractRollupId }
 					await processTransaction(tx)
 				}
 			}
