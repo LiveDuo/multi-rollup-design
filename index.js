@@ -35,7 +35,8 @@ const processTransactionAsync = async (_tx) => {
 			
 			const txs = await rpcRequest(daRpcUrl, 'get_txs', [])
 			
-			// TODO same as above
+			// NOTE this returns all contracts
+			// TODO should recalculate address ie. Address.generate(recoverSignature(sig), salt) and filter
 			const txsAddress = txs.filter(tx => (tx.action === 'create_contract' && stateHub.contracts[address].rollupId === targetRollupId) || (tx.action === 'call_contract' && tx.params[0] === address))
 			for (let tx of txsAddress) {
 				await processTransaction(tx)
@@ -56,8 +57,8 @@ const processTransactionAsync = async (_tx) => {
 		for (const [i, [address, data]] of rollupContracts.entries()) {
 			const contractRollupId = i % stateHub.count
 			if (contractRollupId === rollupId) {
-				// NOTE this returns all contracts
-				// TODO should recalculate address ie. Address.generate(recoverSignature(sig), salt) and filter
+				
+				// TODO same as above
 				const txsRollup = txs.filter(tx => (tx.action === 'create_contract' && data.rollupId === targetRollupId) || (tx.action === 'call_contract' && tx.params[0] === address))
 				for (let tx of txsRollup) {
 					await processTransaction(tx)
@@ -75,7 +76,7 @@ ws.on('message', async (message) => {
 	const tx = JSON.parse(message.toString())
 	await processTransaction(tx)
 
-	// TODO should process `reassign_contract` or `remove_contract` like the RPC server
+	await processTransactionAsync(tx)
 })
 
 const submitTransaction = async (tx) => {
