@@ -28,6 +28,8 @@ ws.on('open', () => {
 ws.on('message', async (message) => {
 	const tx = JSON.parse(message.toString())
 	await processTransaction(tx)
+
+	// TODO should process `reassign_contract` or `remove_contract` like the RPC server
 })
 
 const submitTransaction = async (tx) => {
@@ -74,8 +76,8 @@ server.addMethod('reassign_contract', async ([targetRollupId, address]) => {
 
 	const stateHub = queryHub()
 	const contractRollupId =  stateHub.contracts[address].rollupId
-
-	if (contractRollupId === targetRollupId) {
+	
+	if (contractRollupId === targetRollupId && rollupId === targetRollupId) {
 		setSynced(false)
 		
 		const txs = await rpcRequest(daRpcUrl, 'get_txs', [])
