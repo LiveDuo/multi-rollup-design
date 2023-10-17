@@ -29,7 +29,7 @@ const processTransactionAsync = async (_tx) => {
 	
 	if (_tx.action === 'reassign_contract') {
 
-		const [targetRollupId, address] = _tx.params
+		const [address, targetRollupId] = _tx.params
 
 		if (targetRollupId === rollupId) {
 			setSynced(false)
