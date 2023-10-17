@@ -70,3 +70,12 @@ const getSignature = (tx, senderWallet) => {
     return '0x' + Buffer.from(signature).toString('hex')
 }
 exports.getSignature = getSignature
+
+const recoverAddress = (tx) => {
+	const signature = Buffer.from(tx.signature.substring(2), 'hex')
+	const [v, r, s] = [signature.subarray(0, 1), signature.subarray(1, 33), signature.subarray(33, 65)]
+	const messageHash = getMessageHash(tx)
+	const publicKey = ecrecover(messageHash, bytesToBigInt(v), r, s, 1n)
+	return Address.fromPublicKey(publicKey)
+}
+exports.recoverAddress = recoverAddress
