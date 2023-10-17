@@ -77,7 +77,7 @@ test('e2e: create 2 contracts and reassign one of them', async () => {
     assert.deepStrictEqual(Object.values(stateData3 ?? [])[0], '0x04')
 
     // reassign contract 2
-    await rpcRequest(nodeUrl2, 'submit_tx', [signTx({action: 'reassign_contract', params: [0, createResult2.createdAddress.toString()]})])
+    await rpcRequest(nodeUrl2, 'submit_tx', [signTx({action: 'reassign_contract', params: [createResult2.createdAddress.toString(), 0]})])
     
     // check state after waiting
     await new Promise((r) => setTimeout(r, 1000))
