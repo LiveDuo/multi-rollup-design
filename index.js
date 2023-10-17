@@ -24,7 +24,7 @@ console.log('init', `rollupId=${rollupId}`)
 
 const getTxAddress = (tx) => Address.generate(recoverSender(tx), BigInt(tx.params[1]))
 
-const isCreateContractAddress = (tx, address) => tx.action === 'create_contract' && getTxAddress(tx) === address
+const isCreateContractAddress = (tx, address) => tx.action === 'create_contract' && getTxAddress(tx).equals(Address.fromString(address))
 const isCreateContractRollup = (tx, contractRollupId, targetRollupId) => tx.action === 'create_contract' && contractRollupId === targetRollupId
 const isCallContract = (tx, address) => tx.action === 'call_contract' && tx.params[0] === address
 
@@ -34,16 +34,11 @@ const processTransactionAsync = async (_tx) => {
 
 		const [targetRollupId, address] = _tx.params
 
-		const stateHub = queryHub()
-		const contractRollupId =  stateHub.contracts[address].rollupId
-		
-		if (contractRollupId === targetRollupId && rollupId === targetRollupId) {
+		if (targetRollupId === rollupId) {
 			setSynced(false)
-			
-			const txs = await rpcRequest(daRpcUrl, 'get_txs', [])
 
-			const contractRollupId = stateHub.contracts[address].rollupId
-			const txsAddress = txs.filter(tx => isCreateContractRollup(tx, contractRollupId, targetRollupId) && isCreateContractAddress(tx, contractRollupId, address) || isCallContract(tx, address))
+			const txs = await rpcRequest(daRpcUrl, 'get_txs', [])
+			const txsAddress = txs.filter(tx => isCreateContractAddress(tx, address) || isCallContract(tx, address))
 			for (let tx of txsAddress) {
 				await processTransaction(tx)
 			}
