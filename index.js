@@ -3,20 +3,17 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const { JSONRPCServer } = require('json-rpc-2.0')
 const WebSocket = require('ws')
-const { Wallet } = require('@ethereumjs/wallet')
 const { Address } = require('@ethereumjs/util')
 
 const { processTransaction, queryState, queryHub, setSynced, setRollupId } = require('./lib')
 
-const { rpcRequest, getSignature, recoverSender } = require('./test/utils')
+const { rpcRequest, recoverSender } = require('./test/utils')
 
 const argv = minimist(process.argv.slice(2))
 const rollupId = parseInt(argv.id) ?? 0
 const port = parseInt(argv.port) ?? 8000
 const daWsUrl = argv.daWs ?? 'ws://localhost:9000'
 const daRpcUrl = argv.daRpc ?? 'http://localhost:9001'
-
-const senderWallet = Wallet.generate()
 
 setRollupId(rollupId)
 
@@ -80,9 +77,6 @@ ws.on('message', async (message) => {
 })
 
 const submitTransaction = async (tx) => {
-	// NOTE this overrides the tx signature and hence the tx sender
-	// TODO fix by moving signing to e2e test
-	tx.signature = getSignature(tx, senderWallet)
 	ws.send(JSON.stringify(tx))
 	const result = await processTransaction(tx)
 	return result
