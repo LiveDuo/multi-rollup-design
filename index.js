@@ -21,6 +21,52 @@ setRollupId(rollupId)
 
 console.log('init', `rollupId=${rollupId}`)
 
+const processTransactionAsync = async (_tx) => {
+	
+	if (_tx.action === 'reassign_contract') {
+
+		const [targetRollupId, address] = _tx.params
+
+		const stateHub = queryHub()
+		const contractRollupId =  stateHub.contracts[address].rollupId
+		
+		if (contractRollupId === targetRollupId && rollupId === targetRollupId) {
+			setSynced(false)
+			
+			const txs = await rpcRequest(daRpcUrl, 'get_txs', [])
+			
+			// TODO same as above
+			const txsAddress = txs.filter(tx => (tx.action === 'create_contract' && stateHub.contracts[address].rollupId === targetRollupId) || (tx.action === 'call_contract' && tx.params[0] === address))
+			for (let tx of txsAddress) {
+				await processTransaction(tx)
+			}
+			
+			setSynced(true)
+		}
+	} else if (_tx.action === 'remove_rollup') {
+
+		const [targetRollupId] = _tx.params
+
+		// get rollup contracts
+		const stateHub = queryHub()
+		const rollupContracts = Object.entries(stateHub.contracts).filter(([_, data]) => data.rollupId === targetRollupId)
+		
+		// reassign contracts
+		const txs = await rpcRequest(daRpcUrl, 'get_txs', [])
+		for (const [i, [address, data]] of rollupContracts.entries()) {
+			const contractRollupId = i % stateHub.count
+			if (contractRollupId === rollupId) {
+				// NOTE this returns all contracts
+				// TODO should recalculate address ie. Address.generate(recoverSignature(sig), salt) and filter
+				const txsRollup = txs.filter(tx => (tx.action === 'create_contract' && data.rollupId === targetRollupId) || (tx.action === 'call_contract' && tx.params[0] === address))
+				for (let tx of txsRollup) {
+					await processTransaction(tx)
+				}
+			}
+		}
+	}
+}
+
 const ws = new WebSocket(daWsUrl)
 ws.on('open', () => {
 	console.log('da websocket connected')
@@ -47,25 +93,9 @@ server.addMethod('add_rollup', async () => {
 	return await submitTransaction({ action: 'add_rollup', params: [] })
 })
 server.addMethod('remove_rollup', async ([targetRollupId]) => {
-	await submitTransaction({ action: 'remove_rollup', params: [targetRollupId] })
+	await submitTransaction()
 
-	// get rollup contracts
-	const stateHub = queryHub()
-	const rollupContracts = Object.entries(stateHub.contracts).filter(([_, data]) => data.rollupId === targetRollupId)
-
-	// reassign contracts
-	const txs = await rpcRequest(daRpcUrl, 'get_txs', [])
-	for (const [i, [address, data]] of rollupContracts.entries()) {
-		const contractRollupId = i % stateHub.count
-		if (contractRollupId === rollupId) {
-			// NOTE this returns all contracts
-			// TODO should recalculate address ie. Address.generate(recoverSignature(sig), salt) and filter
-			const txsRollup = txs.filter(tx => (tx.action === 'create_contract' && data.rollupId === targetRollupId) || (tx.action === 'call_contract' && tx.params[0] === address))
-			for (let tx of txsRollup) {
-				await processTransaction(tx)
-			}
-		}
-	}
+	await processTransactionAsync({ action: 'remove_rollup', params: [targetRollupId] })
 })
 server.addMethod('create_contract', async ([code, salt]) => {
 	const createResult = await submitTransaction({ action: 'create_contract', params: [code, salt] })
@@ -73,23 +103,8 @@ server.addMethod('create_contract', async ([code, salt]) => {
 })
 server.addMethod('reassign_contract', async ([targetRollupId, address]) => {
 	await submitTransaction({ action: 'reassign_contract', params: [targetRollupId, address] })
-
-	const stateHub = queryHub()
-	const contractRollupId =  stateHub.contracts[address].rollupId
 	
-	if (contractRollupId === targetRollupId && rollupId === targetRollupId) {
-		setSynced(false)
-		
-		const txs = await rpcRequest(daRpcUrl, 'get_txs', [])
-		
-		// TODO same as above
-		const txsAddress = txs.filter(tx => (tx.action === 'create_contract' && stateHub.contracts[address].rollupId === targetRollupId) || (tx.action === 'call_contract' && tx.params[0] === address))
-		for (let tx of txsAddress) {
-			await processTransaction(tx)
-		}
-		
-		setSynced(true)
-	}
+	await processTransactionAsync({ action: 'reassign_contract', params: [targetRollupId, address] })
 })
 server.addMethod('call_contract', async ([address, calldata]) => {
 	await submitTransaction({ action: 'call_contract', params: [address, calldata] })
