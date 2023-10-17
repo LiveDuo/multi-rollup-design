@@ -93,7 +93,7 @@ server.addMethod('add_rollup', async () => {
 	return await submitTransaction({ action: 'add_rollup', params: [] })
 })
 server.addMethod('remove_rollup', async ([targetRollupId]) => {
-	await submitTransaction()
+	await submitTransaction({ action: 'remove_rollup', params: [targetRollupId] })
 
 	await processTransactionAsync({ action: 'remove_rollup', params: [targetRollupId] })
 })
