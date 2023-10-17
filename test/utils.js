@@ -1,5 +1,5 @@
 const { keccak256 } = require('ethereum-cryptography/keccak')
-const { ecsign, bigIntToBytes } = require('@ethereumjs/util')
+const { Address, ecsign, ecrecover, bigIntToBytes, bytesToBigInt } = require('@ethereumjs/util')
 const { RLP } = require('@ethereumjs/rlp')
 
 const fetch = require('node-fetch')
@@ -71,11 +71,11 @@ const getSignature = (tx, senderWallet) => {
 }
 exports.getSignature = getSignature
 
-const recoverAddress = (tx) => {
+const recoverSender = (tx) => {
 	const signature = Buffer.from(tx.signature.substring(2), 'hex')
 	const [v, r, s] = [signature.subarray(0, 1), signature.subarray(1, 33), signature.subarray(33, 65)]
 	const messageHash = getMessageHash(tx)
 	const publicKey = ecrecover(messageHash, bytesToBigInt(v), r, s, 1n)
 	return Address.fromPublicKey(publicKey)
 }
-exports.recoverAddress = recoverAddress
+exports.recoverSender = recoverSender

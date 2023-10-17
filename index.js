@@ -4,10 +4,11 @@ const bodyParser = require('body-parser')
 const { JSONRPCServer } = require('json-rpc-2.0')
 const WebSocket = require('ws')
 const { Wallet } = require('@ethereumjs/wallet')
+const { Address } = require('@ethereumjs/util')
 
 const { processTransaction, queryState, queryHub, setSynced, setRollupId } = require('./lib')
 
-const { rpcRequest, getSignature } = require('./test/utils')
+const { rpcRequest, getSignature, recoverSender } = require('./test/utils')
 
 const argv = minimist(process.argv.slice(2))
 const rollupId = parseInt(argv.id) ?? 0
@@ -20,6 +21,12 @@ const senderWallet = Wallet.generate()
 setRollupId(rollupId)
 
 console.log('init', `rollupId=${rollupId}`)
+
+const getTxAddress = (tx) => Address.generate(recoverSender(tx), BigInt(tx.params[1]))
+
+const isCreateContractAddress = (tx, address) => tx.action === 'create_contract' && getTxAddress(tx) === address
+const isCreateContractRollup = (tx, contractRollupId, targetRollupId) => tx.action === 'create_contract' && contractRollupId === targetRollupId
+const isCallContract = (tx, address) => tx.action === 'call_contract' && tx.params[0] === address
 
 const processTransactionAsync = async (_tx) => {
 	
@@ -34,10 +41,9 @@ const processTransactionAsync = async (_tx) => {
 			setSynced(false)
 			
 			const txs = await rpcRequest(daRpcUrl, 'get_txs', [])
-			
-			// NOTE this returns all contracts
-			// TODO should recalculate address ie. Address.generate(recoverSignature(sig), salt) and filter
-			const txsAddress = txs.filter(tx => (tx.action === 'create_contract' && stateHub.contracts[address].rollupId === targetRollupId) || (tx.action === 'call_contract' && tx.params[0] === address))
+
+			const contractRollupId = stateHub.contracts[address].rollupId
+			const txsAddress = txs.filter(tx => isCreateContractRollup(tx, contractRollupId, targetRollupId) && isCreateContractAddress(tx, contractRollupId, address) || isCallContract(tx, address))
 			for (let tx of txsAddress) {
 				await processTransaction(tx)
 			}
@@ -58,8 +64,7 @@ const processTransactionAsync = async (_tx) => {
 			const contractRollupId = i % stateHub.count
 			if (contractRollupId === rollupId) {
 				
-				// TODO same as above
-				const txsRollup = txs.filter(tx => (tx.action === 'create_contract' && data.rollupId === targetRollupId) || (tx.action === 'call_contract' && tx.params[0] === address))
+				const txsRollup = txs.filter(tx => isCreateContractRollup(tx, data.rollupId, targetRollupId) || (isCallContract(tx, address)))
 				for (let tx of txsRollup) {
 					await processTransaction(tx)
 				}
