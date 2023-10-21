@@ -22,7 +22,6 @@ console.log('init', `rollupId=${rollupId}`)
 const getTxAddress = (tx) => Address.generate(recoverSender(tx), BigInt(tx.params[1]))
 
 const isCreateContractAddress = (tx, address) => tx.action === 'create_contract' && getTxAddress(tx).equals(Address.fromString(address))
-const isCreateContractRollup = (tx, contractRollupId, targetRollupId) => tx.action === 'create_contract' && contractRollupId === targetRollupId
 const isCallContract = (tx, address) => tx.action === 'call_contract' && tx.params[0] === address
 
 const processTransactionAsync = async (_tx) => {
